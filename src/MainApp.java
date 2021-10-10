@@ -520,6 +520,12 @@ public class MainApp extends JPanel implements EventListener{
 	}
 	
 	public static void openFile() {
+		//(TODO): Figure out the lines which are joined with the next and ones which are intentionally line gaped
+		//Save and load that so it works
+		
+		//(TODO): Figure out how to save the highlights... fuck that thing is going to screw with my brain
+		//Save it within file and not display? Encoded files with html inside which the code can read to add the highlights?
+		
 		File file = files[fileSelectionIndex];
 		currentFile = file;
 		openFileDir += file.getName();
@@ -539,11 +545,35 @@ public class MainApp extends JPanel implements EventListener{
 				String data = myReader.nextLine();
 				texts.add(new Text(0, 0));
 				texts.get(i).text = data;
+				
+				for(int j = 0; j < data.length(); j++) {
+					if(data.charAt(j) == ' ') {
+						texts.get(i).lastSpaces.add(0, j);
+					}
+				}
+				
 				i++;
 			}
 			
 			if(i == 0) {
 				texts.add(new Text(0, 0));
+			}
+			
+			for(int j = 0; j < texts.size(); j++) {
+				String text = texts.get(j).text.substring(Math.min(texts.get(j).text.length(), characters));
+				texts.get(j).text = texts.get(j).text.substring(0, Math.min(characters, texts.get(j).text.length()));
+				
+				if(text.length() > 0) {
+					for(int k = 0; k < texts.get(j).lastSpaces.size(); k++) {
+						if(texts.get(j).lastSpaces.get(k) >= texts.get(j).text.length()) {
+							texts.get(j).lastSpaces.remove(k);
+							k--;
+						}
+					}
+					
+					texts.add(j + 1, new Text(0, 0));
+					texts.get(j + 1).text = text;
+				}
 			}
 			
 			myReader.close();

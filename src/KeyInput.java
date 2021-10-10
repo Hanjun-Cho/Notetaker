@@ -42,11 +42,17 @@ public class KeyInput extends KeyAdapter {
 			if(MainApp.fileSelectionIndex != 0) {
 				MainApp.fileSelectionIndex--;
 			}
+			else {
+				MainApp.fileSelectionIndex = MainApp.files.length - 1;
+			}
 		}
 		
 		if(e.getKeyCode() == KeyEvent.VK_DOWN) {
 			if(MainApp.fileSelectionIndex < MainApp.files.length - 1) {
 				MainApp.fileSelectionIndex++;
+			}
+			else {
+				MainApp.fileSelectionIndex = 0;
 			}
 		}
 	}
