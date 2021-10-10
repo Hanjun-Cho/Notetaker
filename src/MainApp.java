@@ -526,6 +526,9 @@ public class MainApp extends JPanel implements EventListener{
 		//(TODO): Figure out how to save the highlights... fuck that thing is going to screw with my brain
 		//Save it within file and not display? Encoded files with html inside which the code can read to add the highlights?
 		
+		//(TODO): There's a highlighting problem, what the fuck was young tommy doing ffs... Anyway, to replicate just
+		//highlight an early part of the text then highlight an area of the text after that
+		
 		File file = files[fileSelectionIndex];
 		currentFile = file;
 		openFileDir += file.getName();
