@@ -30,8 +30,25 @@ public class KeyInput extends KeyAdapter {
 			typeFileName(e);
 			deleteFileName(e);
 		}
+		else if(MainApp.state == MainApp.programState.openFile) {
+			moveFileSelection(e);
+		}
 
 		commands(e);
+	}
+	
+	public void moveFileSelection(KeyEvent e) {
+		if(e.getKeyCode() == KeyEvent.VK_UP) {
+			if(MainApp.fileSelectionIndex != 0) {
+				MainApp.fileSelectionIndex--;
+			}
+		}
+		
+		if(e.getKeyCode() == KeyEvent.VK_DOWN) {
+			if(MainApp.fileSelectionIndex < MainApp.files.length - 1) {
+				MainApp.fileSelectionIndex++;
+			}
+		}
 	}
 	
 	public void deleteFileName(KeyEvent e) {
@@ -90,10 +107,13 @@ public class KeyInput extends KeyAdapter {
 			MainApp.listFiles();
 		}
 		
+		if(controlHeld && e.getKeyCode() == KeyEvent.VK_O) {
+			MainApp.state = MainApp.programState.openFile;
+			MainApp.listFiles();
+		}
+		
 		if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-			if(MainApp.state == MainApp.programState.newFile) {
-				MainApp.state = MainApp.programState.editor;
-			}
+			MainApp.state = MainApp.programState.editor;
 		}
 	
 		if(e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -101,6 +121,11 @@ public class KeyInput extends KeyAdapter {
 				MainApp.state = MainApp.programState.editor;
 				System.out.println("Created File " + MainApp.fileName);
 				MainApp.createFile();
+			}
+			else if(MainApp.state == MainApp.programState.openFile) {
+				MainApp.state = MainApp.programState.editor;
+				System.out.println("Opened File " + MainApp.files[MainApp.fileSelectionIndex].getName());
+				MainApp.openFile();
 			}
 		}
 	}

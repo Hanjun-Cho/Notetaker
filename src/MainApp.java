@@ -8,6 +8,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.EventListener;
 import java.util.Random;
+import java.util.Scanner;
 
 import javax.imageio.ImageIO;
 import javax.sound.sampled.LineUnavailableException;
@@ -120,6 +122,7 @@ public class MainApp extends JPanel implements EventListener{
 	public static int textWidth = 11;
 	
 	public static int cursorXPosOffsetNewFile = 124;
+	public static int fileSelectionIndex = 0;
 	
 	public static float cursorXLerpSpeed = 0.5f;
 	public static float cursorYLerpSpeed = 0.5f;
@@ -133,10 +136,12 @@ public class MainApp extends JPanel implements EventListener{
 	public static boolean changed = true;
 	static String directory = "files";
 	static File[] files = null;
+	public static String openFileDir = "files/";
 	
 	enum programState {
 		editor,
-		newFile
+		newFile,
+		openFile
 	}
 	
 	public static programState state = programState.editor;
@@ -325,7 +330,11 @@ public class MainApp extends JPanel implements EventListener{
 			FileWriter writer = new FileWriter(currentFile);
 
 			for(int i = 0; i < texts.size(); i++) {
-				writer.write(texts.get(i).text + "\n");
+				writer.write(texts.get(i).text);
+				
+				if(i != texts.size() - 1) {
+					writer.write("\n");
+				}
 			}
 			
 			writer.close();
@@ -477,6 +486,73 @@ public class MainApp extends JPanel implements EventListener{
 				}
 			}
 		}
+		
+		if(state == programState.openFile) {
+			g.setColor(new Color(23, 23, 23));
+			g.fillRect(0, topBarHeight, SCREEN_WIDTH, SCREEN_HEIGHT);
+			g.setColor(new Color(110, 179, 219));
+			g.drawString("Open File", 12, 24);
+			
+			if(files != null) {
+				int i = 0;
+				
+				for(File file : files) {
+					int height = 65;
+					int yPos = 48 + (i * 70);
+					
+					if(i == 0) height = 60;
+					if(i >= 1) yPos -= 5;
+					
+					g.setColor(new Color(38, 38, 38));
+					if(fileSelectionIndex == i)
+						g.setColor(new Color(25, 25, 25));
+					g.fillRect(12, yPos, SCREEN_WIDTH - 40, height);
+					
+					g.setColor(new Color(200, 200, 200));
+					g.drawString(file.getName(), 35, yPos + 38);
+					
+					g.setColor(new Color(232, 93, 93, 150));
+					g.drawString("Last Opened: " + new Date(file.lastModified()).toString(), 50 + (file.getName().length() * textWidth), yPos + 38);
+					i++;
+				}
+			}
+		}
+	}
+	
+	public static void openFile() {
+		File file = files[fileSelectionIndex];
+		currentFile = file;
+		openFileDir += file.getName();
+		
+		for(int i = 0; i < texts.size(); i++) {
+			texts.remove(i);
+			i--;
+		}
+		
+		Scanner myReader;
+		try {
+			myReader = new Scanner(file);
+			
+			int i = 0;
+			
+			while (myReader.hasNextLine()) {
+				String data = myReader.nextLine();
+				texts.add(new Text(0, 0));
+				texts.get(i).text = data;
+				i++;
+			}
+			
+			if(i == 0) {
+				texts.add(new Text(0, 0));
+			}
+			
+			myReader.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	    
+		System.out.println(openFileDir);
+		openFileDir = openFileDir.substring(0, openFileDir.length() - file.getName().length());
 	}
 	
 	public synchronized void stop() {
@@ -531,9 +607,9 @@ public class MainApp extends JPanel implements EventListener{
 		frame = new JFrame("Text Rendering Test Engine (" + FPS + ")");
 		frame.setMinimumSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		//frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		frame.setLocationRelativeTo(null);
-		//frame.setUndecorated(true);
+		frame.setUndecorated(true);
 		frame.getContentPane().setBackground(Color.white);
 		frame.setResizable(false);
 		frame.add(this);
