@@ -72,6 +72,7 @@ class Text {
 	public int y;
 	public ArrayList<Integer> lastSpaces = new ArrayList<Integer>();
 	public ArrayList<Highlight> highlights = new ArrayList<Highlight>();
+	public boolean wrapped = false;
 	
 	public Text(int x, int y) {
 		this.x = x;
@@ -179,7 +180,7 @@ public class MainApp extends JPanel implements EventListener{
 		
 		characters = SCREEN_WIDTH / textWidth;
 		lines = (SCREEN_HEIGHT - textYOffset) / lineIncrement;
-		characters -= 10;
+		characters -= 7;
 		
 		
 		if(selectedText >= endLine - 1) {
@@ -281,7 +282,7 @@ public class MainApp extends JPanel implements EventListener{
 						break;
 					}
 				}
-				else if(s < start) {
+				else if(s < start && e >= start) {
 					if(e <= end) {
 						texts.get(selectedText).highlights.get(i).end = start;
 						texts.get(selectedText).highlights.add(new Highlight(start, end, type));
@@ -332,8 +333,11 @@ public class MainApp extends JPanel implements EventListener{
 			for(int i = 0; i < texts.size(); i++) {
 				writer.write(texts.get(i).text);
 				
-				if(i != texts.size() - 1) {
+				if(!texts.get(i).wrapped) {
 					writer.write("\n");
+				}
+				else {
+					writer.write(" ");
 				}
 			}
 			
@@ -526,8 +530,7 @@ public class MainApp extends JPanel implements EventListener{
 		//(TODO): Figure out how to save the highlights... fuck that thing is going to screw with my brain
 		//Save it within file and not display? Encoded files with html inside which the code can read to add the highlights?
 		
-		//(TODO): There's a highlighting problem, what the fuck was young tommy doing ffs... Anyway, to replicate just
-		//highlight an early part of the text then highlight an area of the text after that
+		//(TODO): realized a program with the loading system with the current one just cutting off whatever was x characters from the edge
 		
 		File file = files[fileSelectionIndex];
 		currentFile = file;
@@ -562,22 +565,71 @@ public class MainApp extends JPanel implements EventListener{
 				texts.add(new Text(0, 0));
 			}
 			
-			for(int j = 0; j < texts.size(); j++) {
-				String text = texts.get(j).text.substring(Math.min(texts.get(j).text.length(), characters));
-				texts.get(j).text = texts.get(j).text.substring(0, Math.min(characters, texts.get(j).text.length()));
+			System.out.println(texts.get(i - 1).lastSpaces.get(0));
+			String text = "";
+			
+			for(int j = 0; j < texts.get(i - 1).lastSpaces.size(); j++) {
+				System.out.println(texts.get(i - 1).text.length()  - texts.get(i - 1).lastSpaces.get(j) + ", " + characters);
 				
-				if(text.length() > 0) {
-					for(int k = 0; k < texts.get(j).lastSpaces.size(); k++) {
-						if(texts.get(j).lastSpaces.get(k) >= texts.get(j).text.length()) {
-							texts.get(j).lastSpaces.remove(k);
-							k--;
-						}
-					}
-					
-					texts.add(j + 1, new Text(0, 0));
-					texts.get(j + 1).text = text;
+				if(texts.get(i - 1).text.length()  - (texts.get(i - 1).text.length() - texts.get(i - 1).lastSpaces.get(j)) <= characters) {
+					text = texts.get(i - 1).text.substring(texts.get(i - 1).lastSpaces.get(j) + 1);
+					texts.get(i - 1).text = texts.get(i - 1).text.substring(0, texts.get(i - 1).lastSpaces.get(j));
+					break;
 				}
 			}
+
+			
+			if(text.length() > 0) {
+				texts.get(i - 1).wrapped = true;
+				texts.add(i, new Text(0, 0));
+				texts.get(i).text = text;
+			
+				for(int k = 0; k < texts.get(i - 1).lastSpaces.size(); k++) {
+					if(texts.get(i - 1).lastSpaces.get(k) > texts.get(i - 1).text.length()) {
+						texts.get(i - 1).lastSpaces.remove(k);
+						k--;
+					}
+				}
+				
+				for(int j = 0; j < text.length(); j++) {
+					if(text.charAt(j) == ' ') {
+						texts.get(i).lastSpaces.add(0, j);
+					}
+				}
+			}
+			
+//			for(int j = 0; j < texts.size(); j++) {
+//				String text = "";
+//				
+//				if(texts.get(j).lastSpaces.size() > 0) {					
+//					for(int k = 0; k < texts.get(j).lastSpaces.size(); k++) {
+//						if(texts.get(j).text.length() - text.length() <= characters) {
+//							texts.get(j).text = texts.get(j).text.substring(0, texts.get(j).lastSpaces.get(k));
+//							
+//							if(text.length() > 0) {							
+//								texts.add(j + 1, new Text(0, 0));
+//								texts.get(j + 1).text = text;
+//								
+//								for(int l = 0; l < texts.get(j).lastSpaces.size(); l++) {
+//									if(texts.get(j).lastSpaces.get(l) > texts.get(j).text.length()) {
+//										texts.get(j).lastSpaces.remove(l);
+//										l--;
+//									}
+//								}
+//								
+//								for(int l = 0; l < text.length(); l++) {
+//									if(text.charAt(l) == ' ') {
+//										texts.get(j + 1).lastSpaces.add(0, l);
+//									}
+//								}
+//							}
+//						}
+//						else {							
+//							text += texts.get(j).text.substring(texts.get(j).lastSpaces.get(k));
+//						}
+//					}
+//				}
+//			}
 			
 			myReader.close();
 		} catch (FileNotFoundException e) {
