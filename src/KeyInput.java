@@ -1,3 +1,5 @@
+
+
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
@@ -50,7 +52,7 @@ public class KeyInput extends KeyAdapter {
 				MainApp.fileSelectionIndex++;
 			}
 			else {
-				MainApp.fileSelectionIndex = 0;
+				MainApp.fileSelectionIndex = 0;	
 			}
 		}
 	}
@@ -118,6 +120,10 @@ public class KeyInput extends KeyAdapter {
 		
 		if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 			MainApp.state = MainApp.programState.editor;
+		}
+		
+		if(altHeld && e.getKeyCode() == KeyEvent.VK_X) {
+			MainApp.state = MainApp.programState.commands;
 		}
 	
 		if(e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -207,7 +213,6 @@ public class KeyInput extends KeyAdapter {
 							}
 						}
 						
-						MainApp.texts.get(MainApp.selectedText).wrapped = false;
 						MainApp.selectedIndex = MainApp.texts.get(MainApp.selectedText).text.length() - text.length();
 					}
 				}
@@ -228,7 +233,6 @@ public class KeyInput extends KeyAdapter {
 						}
 						
 						MainApp.selectedText--;
-						MainApp.texts.get(MainApp.selectedText).wrapped = false;
 					}
 					else {
 						MainApp.texts.get(MainApp.selectedText).lastSpaces.add(0);						
@@ -274,7 +278,6 @@ public class KeyInput extends KeyAdapter {
 			
 			if(MainApp.texts.get(MainApp.selectedText).text.length() > MainApp.characters) {
 				MainApp.texts.add(MainApp.selectedText + 1, new Text(0, 0));
-				MainApp.texts.get(MainApp.selectedText).wrapped = true;
 				
 				if(MainApp.texts.get(MainApp.selectedText).lastSpaces.get(0) != 0) {					
 					text = MainApp.texts.get(MainApp.selectedText).text.substring(MainApp.texts.get(MainApp.selectedText).lastSpaces.get(0) + 1);

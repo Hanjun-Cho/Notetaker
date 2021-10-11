@@ -142,7 +142,8 @@ public class MainApp extends JPanel implements EventListener{
 	enum programState {
 		editor,
 		newFile,
-		openFile
+		openFile,
+		commands
 	}
 	
 	public static programState state = programState.editor;
@@ -255,6 +256,8 @@ public class MainApp extends JPanel implements EventListener{
 		try {
 			file.createNewFile();
 			currentFile = file;
+			
+			texts.clear();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -524,13 +527,8 @@ public class MainApp extends JPanel implements EventListener{
 	}
 	
 	public static void openFile() {
-		//(TODO): Figure out the lines which are joined with the next and ones which are intentionally line gaped
-		//Save and load that so it works
-		
 		//(TODO): Figure out how to save the highlights... fuck that thing is going to screw with my brain
 		//Save it within file and not display? Encoded files with html inside which the code can read to add the highlights?
-		
-		//(TODO): realized a program with the loading system with the current one just cutting off whatever was x characters from the edge
 		
 		File file = files[fileSelectionIndex];
 		currentFile = file;
@@ -598,38 +596,8 @@ public class MainApp extends JPanel implements EventListener{
 				}
 			}
 			
-//			for(int j = 0; j < texts.size(); j++) {
-//				String text = "";
-//				
-//				if(texts.get(j).lastSpaces.size() > 0) {					
-//					for(int k = 0; k < texts.get(j).lastSpaces.size(); k++) {
-//						if(texts.get(j).text.length() - text.length() <= characters) {
-//							texts.get(j).text = texts.get(j).text.substring(0, texts.get(j).lastSpaces.get(k));
-//							
-//							if(text.length() > 0) {							
-//								texts.add(j + 1, new Text(0, 0));
-//								texts.get(j + 1).text = text;
-//								
-//								for(int l = 0; l < texts.get(j).lastSpaces.size(); l++) {
-//									if(texts.get(j).lastSpaces.get(l) > texts.get(j).text.length()) {
-//										texts.get(j).lastSpaces.remove(l);
-//										l--;
-//									}
-//								}
-//								
-//								for(int l = 0; l < text.length(); l++) {
-//									if(text.charAt(l) == ' ') {
-//										texts.get(j + 1).lastSpaces.add(0, l);
-//									}
-//								}
-//							}
-//						}
-//						else {							
-//							text += texts.get(j).text.substring(texts.get(j).lastSpaces.get(k));
-//						}
-//					}
-//				}
-//			}
+			selectedText = 0;
+			selectedIndex = 0;
 			
 			myReader.close();
 		} catch (FileNotFoundException e) {
