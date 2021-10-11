@@ -1,5 +1,3 @@
-
-
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
@@ -26,7 +24,14 @@ public class KeyInput extends KeyAdapter {
 			moveCommandSelection(e);
 		}
 		
-		commands(e);
+		if(MainApp.state == MainApp.programState.newFile) {
+			typeFileName(e);
+			deleteFileName(e);
+		}
+		
+		if(MainApp.state == MainApp.programState.openFile) {
+			moveFileSelection(e);
+		}
 		
 		if(MainApp.state == MainApp.programState.editor) {			
 			highlight(e);
@@ -34,13 +39,8 @@ public class KeyInput extends KeyAdapter {
 			move(e);
 			delete(e);
 		}
-		else if(MainApp.state == MainApp.programState.newFile) {
-			typeFileName(e);
-			deleteFileName(e);
-		}
-		else if(MainApp.state == MainApp.programState.openFile) {
-			moveFileSelection(e);
-		}
+
+		commands(e);
 	}
 	
 	public void moveCommandSelection(KeyEvent e) {

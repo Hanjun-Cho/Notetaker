@@ -288,6 +288,9 @@ public class MainApp extends JPanel implements EventListener{
 			currentFile = file;
 			
 			texts.clear();
+			texts.add(0, new Text(0, 0));
+			selectedText = 0;
+			selectedIndex = 0;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -673,8 +676,6 @@ public class MainApp extends JPanel implements EventListener{
 				}
 			}
 			
-			selectedText = 0;
-			selectedIndex = 0;
 			
 			myReader.close();
 		} catch (FileNotFoundException e) {
@@ -683,6 +684,8 @@ public class MainApp extends JPanel implements EventListener{
 	    
 		System.out.println(openFileDir);
 		openFileDir = openFileDir.substring(0, openFileDir.length() - file.getName().length());
+		selectedText = 0;
+		selectedIndex = 0;
 	}
 	
 	public synchronized void stop() {
