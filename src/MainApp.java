@@ -30,6 +30,11 @@ enum HighlightType {
 	Yellow
 }
 
+enum CommandType {
+	DeleteFile,
+	RenameFile,
+}
+
 class Highlight {
 	public int start;
 	public int end;
@@ -89,6 +94,18 @@ class Text {
 	}
 }
 
+class Command {
+	public String name;
+	public String desciption;
+	public CommandType type;
+	
+	public Command(String name, String description, CommandType type) {
+		this.name = name;
+		this.desciption = description;
+		this.type = type;
+	}
+}
+
 public class MainApp extends JPanel implements EventListener{
 
 	private static final long serialVersionUID = 1L;
@@ -102,10 +119,17 @@ public class MainApp extends JPanel implements EventListener{
 	public static int selectedIndex = 0;
 	static File currentFile = null;
 	
+	public static Command[] commands = new Command[] {
+		new Command("Delete", "Deletes current file", CommandType.DeleteFile),
+		new Command("Rename", "Renames current file", CommandType.RenameFile),
+	};
+	
 	Font font;
 	BufferedImage cursor;
 	public static String fileName = "filename...";
+	public static String commandName = "command...";
 	public static int fileNameIndex = fileName.length();
+	public static int commandNameIndex = commandName.length();
 	
 	public static int topBarHeight = 35;
 	public static int lineIncrement = 22;
@@ -123,7 +147,9 @@ public class MainApp extends JPanel implements EventListener{
 	public static int textWidth = 11;
 	
 	public static int cursorXPosOffsetNewFile = 124;
+	public static int cursorXPosOffsetCommand = 155;
 	public static int fileSelectionIndex = 0;
+	public static int commandSelectionIndex = 0;
 	
 	public static float cursorXLerpSpeed = 0.5f;
 	public static float cursorYLerpSpeed = 0.5f;
@@ -212,6 +238,10 @@ public class MainApp extends JPanel implements EventListener{
 			cursorTargetX = cursorXOffset + (selectedIndex * textWidth);
 			cursorTargetY = cursorYOffset + (lineIncrement * (selectedText - 1));
 		}
+		else if(state == programState.commands) {
+			cursorTargetX = cursorXPosOffsetCommand + (textWidth * commandName.length());
+			cursorTargetY = 9;
+		}
 		
 		cursorXPos = (int)Lerp(cursorXPos, cursorTargetX, cursorXLerpSpeed);
 		cursorYPos = (int)Lerp(cursorYPos, cursorTargetY, cursorYLerpSpeed);
@@ -260,6 +290,17 @@ public class MainApp extends JPanel implements EventListener{
 			texts.clear();
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public static void executeCommand() {
+		Command command = commands[commandSelectionIndex];
+		
+		if(command.type == CommandType.DeleteFile) {
+			//(TODO): Make some kind of confirmation for this
+		}
+		else if(command.type == CommandType.RenameFile) {
+			//(TODO): Check for files in the folder and rename depending on that and give confirmation
 		}
 	}
 	
@@ -465,7 +506,7 @@ public class MainApp extends JPanel implements EventListener{
 			g.setColor(new Color(210, 210, 210));
 			
 			if(fileName.trim().equals("filename..."))
-				g.setColor(new Color(150, 150, 150));
+				g.setColor(new Color(130, 130, 130));
 			
 			g.drawString(fileName, 122, 24);
 			g.setColor(new Color(126, 173, 230));
@@ -482,7 +523,7 @@ public class MainApp extends JPanel implements EventListener{
 					if(i >= 1) yPos -= 5;
 					
 					g.setColor(new Color(38, 38, 38));
-					g.fillRect(12, yPos, SCREEN_WIDTH - 40, height);
+					g.fillRect(12, yPos, SCREEN_WIDTH - 24, height);
 					
 					g.setColor(new Color(200, 200, 200));
 					g.drawString(file.getName(), 35, yPos + 38);
@@ -513,7 +554,7 @@ public class MainApp extends JPanel implements EventListener{
 					g.setColor(new Color(38, 38, 38));
 					if(fileSelectionIndex == i)
 						g.setColor(new Color(25, 25, 25));
-					g.fillRect(12, yPos, SCREEN_WIDTH - 40, height);
+					g.fillRect(12, yPos, SCREEN_WIDTH - 24, height);
 					
 					g.setColor(new Color(200, 200, 200));
 					g.drawString(file.getName(), 35, yPos + 38);
@@ -524,11 +565,47 @@ public class MainApp extends JPanel implements EventListener{
 				}
 			}
 		}
+		
+		if(state == programState.commands) {
+			g.setColor(new Color(23, 23, 23));
+			g.fillRect(0, topBarHeight, SCREEN_WIDTH, SCREEN_HEIGHT);
+			g.setColor(new Color(110, 179, 219));
+			g.drawString("Run Command: ", 12, 24);
+			g.setColor(new Color(210, 210, 210));
+			
+			if(commandName.trim().equals("command..."))
+				g.setColor(new Color(130, 130, 130));
+			
+			g.drawString(commandName, 155, 24);
+			
+			g.setColor(new Color(126, 173, 230));
+			g.drawImage(cursor, cursorXPos, cursorYPos, 10, 20, null, null);
+			
+			
+			
+			for(int i = 0; i < commands.length; i++) {
+				int height = 65;
+				int yPos = 48 + (i * 70);
+				
+				g.setColor(new Color(38, 38, 38));
+				if(commandSelectionIndex == i)
+					g.setColor(new Color(25, 25, 25));
+				g.fillRect(12, yPos, SCREEN_WIDTH - 24, height);
+				
+				g.setColor(new Color(200, 200, 200));
+				g.drawString(commands[i].name, 35, yPos + 38);
+				
+				g.setColor(new Color(232, 93, 93, 150));
+				g.drawString(commands[i].desciption, 50 + (commands[i].name.length() * textWidth), yPos + 38);
+			}
+		}
 	}
 	
 	public static void openFile() {
 		//(TODO): Figure out how to save the highlights... fuck that thing is going to screw with my brain
 		//Save it within file and not display? Encoded files with html inside which the code can read to add the highlights?
+		
+		//(TODO): Create folders
 		
 		File file = files[fileSelectionIndex];
 		currentFile = file;

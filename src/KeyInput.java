@@ -20,6 +20,14 @@ public class KeyInput extends KeyAdapter {
 	boolean startedTyping = false;
 	
 	public void keyPressed(KeyEvent e) {
+		if(MainApp.state == MainApp.programState.commands) {
+			typeCommandName(e);
+			deleteCommandName(e);
+			moveCommandSelection(e);
+		}
+		
+		commands(e);
+		
 		if(MainApp.state == MainApp.programState.editor) {			
 			highlight(e);
 			if(!controlHeld) type(e);
@@ -33,8 +41,55 @@ public class KeyInput extends KeyAdapter {
 		else if(MainApp.state == MainApp.programState.openFile) {
 			moveFileSelection(e);
 		}
-
-		commands(e);
+	}
+	
+	public void moveCommandSelection(KeyEvent e) {
+		if(e.getKeyCode() == KeyEvent.VK_UP) {
+			if(MainApp.commandSelectionIndex != 0) {
+				MainApp.commandSelectionIndex--;
+			}
+			else {
+				MainApp.commandSelectionIndex = MainApp.commands.length - 1;
+			}
+		}
+		
+		if(e.getKeyCode() == KeyEvent.VK_DOWN) {
+			if(MainApp.commandSelectionIndex < MainApp.commands.length - 1) {
+				MainApp.commandSelectionIndex++;
+			}
+			else {
+				MainApp.commandSelectionIndex = 0;	
+			}
+		}
+	}
+	
+	public void deleteCommandName(KeyEvent e) {
+		if(e.getKeyCode() == 8) {			
+			if(MainApp.commandNameIndex != 0) {
+				MainApp.commandNameIndex--;
+						
+				String text = MainApp.commandName.substring(0, Math.max(0, MainApp.commandNameIndex));
+				text += MainApp.commandName.substring(MainApp.commandNameIndex + 1);
+				MainApp.commandName = text;
+			}
+		}
+	}
+	
+	public void typeCommandName(KeyEvent e) {
+		if((e.getKeyCode() >= 44 && e.getKeyCode() <= 57) ||
+				(e.getKeyCode() >= 65 && e.getKeyCode() <= 93) ||
+				(e.getKeyCode() == 59) ||
+				(e.getKeyCode() == 32) ||
+				(e.getKeyCode() == 61) ||
+				(e.getKeyCode() == 151) ||
+				(e.getKeyCode() == 152) ||
+				(e.getKeyCode() == 153) ||
+				(e.getKeyCode() == 222)) {
+			String text = MainApp.commandName.substring(0, MainApp.commandNameIndex);
+			text += e.getKeyChar() + MainApp.commandName.substring(MainApp.commandNameIndex);
+			MainApp.commandName = text;
+			MainApp.commandNameIndex++;
+		}
 	}
 	
 	public void moveFileSelection(KeyEvent e) {
@@ -120,6 +175,9 @@ public class KeyInput extends KeyAdapter {
 		
 		if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 			MainApp.state = MainApp.programState.editor;
+			
+			MainApp.fileName = "filename...";
+			MainApp.commandName = "command...";
 		}
 		
 		if(altHeld && e.getKeyCode() == KeyEvent.VK_X) {
