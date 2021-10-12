@@ -1,3 +1,3 @@
 public class Text {
-	public String content;
+	public String content = "";
 }

@@ -8,8 +8,16 @@ public class Window {
 	public boolean active = false;
 	public boolean leftWindow = false;
 	
+	public int selectedText = 0;
+	public int selectedIndex = 0;
+	
+	public int windowXOffset = leftWindow ? 15 : 15 + Main.SCREEN_WIDTH/2;
+	public int windowYOffset = 25;
+	public int cursorYOffset = 11;
+	
 	public Window(boolean leftWindow) {
 		this.leftWindow = leftWindow;
+		windowXOffset = leftWindow ? 15 : 15 + Main.SCREEN_WIDTH/2;
 	}
 	
 	public void paint(Graphics g) {
@@ -24,7 +32,7 @@ public class Window {
 		g.setColor(new Color(200, 200, 200));
 		
 		for(int i = 0; i < content.size(); i++) {
-			g.drawString(content.get(i).content, 15, 25 + (i * 20));
+			g.drawString(content.get(i).content, windowXOffset, windowYOffset + (i * 20));
 		}
 	}
 }
