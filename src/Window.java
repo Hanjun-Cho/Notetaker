@@ -26,16 +26,12 @@ public class Window {
 	
 	int sideBarTextOpacity;
 	int mainTextOpacity;
-	int endLine = Main.lines;
-	int startLine = 0;
-	int offset = 0;
 	
 	public Window(boolean leftWindow) {
 		this.leftWindow = leftWindow;
 	}
 	
 	public void update() {
-		endLine = Main.lines + offset;
 		windowXOffset = leftWindow ? 11 : 11 + Main.SCREEN_WIDTH/2;
 		windowRenderOffsetX = leftWindow ? 0 : Main.SCREEN_WIDTH/2;
 		backgroundColor = active ? new Color(25, 25, 25) : new Color(22, 22, 22);
@@ -43,27 +39,6 @@ public class Window {
 		
 		sideBarTextOpacity = active ? 255 : 100;
 		mainTextOpacity = active ? 255 : 100;
-		
-		if(active) {			
-			if(selectedText >= endLine - 1) {
-				offset++;
-				startLine++;
-				
-				int amountToMove = (windowYOffset + ((endLine) * 20) - 5) - Main.SCREEN_HEIGHT;
-				windowYOffset -= amountToMove;
-				cursorYOffsetPos -= amountToMove;
-			}
-			
-			if(startLine != 0 && selectedText <= startLine - 1) {
-				offset--;
-				startLine--;
-				
-				int amountToMove = Main.SCREEN_HEIGHT - (windowYOffset + ((endLine) * 20) - 5);
-				
-				windowYOffset -= amountToMove;
-				cursorYOffsetPos -= amountToMove;
-			}
-		}
 	}
 	
 	public void paint(Graphics g) {

@@ -18,7 +18,6 @@ public class Main extends JPanel implements EventListener {
 	public static int SCREEN_WIDTH = 1920;
 	public static int SCREEN_HEIGHT = 1080;
 	public static int FONT_WIDTH = 11;
-	public static int lines = (SCREEN_HEIGHT) / 20;
 	
 	static Window leftWindow = new Window(true);
 	static Window rightWindow = new Window(false);
@@ -83,7 +82,6 @@ public class Main extends JPanel implements EventListener {
 	private void update() {
 		SCREEN_WIDTH = frame.getWidth();
 		SCREEN_HEIGHT = frame.getHeight();
-		lines = (SCREEN_HEIGHT) / 20;
 		
 		leftWindow.update();
 		rightWindow.update();
