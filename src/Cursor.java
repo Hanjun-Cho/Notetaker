@@ -18,9 +18,9 @@ public class Cursor {
 	}
 	
 	public void update() {
-		int targetX = Main.activeWindow.windowXOffset + (Main.FONT_WIDTH * Main.activeWindow.selectedIndex) + 2;
-		int targetY = Main.activeWindow.cursorYOffset;
-		cursorX = (int)Main.Lerp(cursorX, targetX, 0.3f);
+		int targetX = Main.activeWindow.windowXOffset + Main.activeWindow.sideBarWidth + (Main.FONT_WIDTH * Main.activeWindow.selectedIndex) + 2;
+		int targetY = Main.activeWindow.cursorYOffset + (20 * Main.activeWindow.selectedText) + Main.activeWindow.cursorYOffsetPos;
+		cursorX = (int)Main.Lerp(cursorX, targetX, 0.5f);
 		cursorY = (int)Main.Lerp(cursorY, targetY, 0.5f);
 	}
 	

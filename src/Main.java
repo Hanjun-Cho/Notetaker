@@ -18,6 +18,7 @@ public class Main extends JPanel implements EventListener {
 	public static int SCREEN_WIDTH = 1920;
 	public static int SCREEN_HEIGHT = 1080;
 	public static int FONT_WIDTH = 11;
+	public static int lines = (SCREEN_HEIGHT) / 20;
 	
 	static Window leftWindow = new Window(true);
 	static Window rightWindow = new Window(false);
@@ -28,14 +29,16 @@ public class Main extends JPanel implements EventListener {
 	boolean isRunning = false;
 	JFrame frame;
 	Fonts font = new Fonts("res/SpaceMono-Regular.ttf", 18f);
-	Cursor cursor = new Cursor();
+	public static Cursor cursor = new Cursor();
 	static Graphics graphics;
+	public static Text currentText;
+	public static TempCursor tempCursor = new TempCursor();
 	
 	public Main() {
 		leftWindow.active = true;
 		leftWindow.content.add(new Text());
 		rightWindow.content.add(new Text());
-		
+		currentText = leftWindow.content.get(0);
 		this.addKeyListener(new Inputs());
 		
 		createWindow();
@@ -55,16 +58,38 @@ public class Main extends JPanel implements EventListener {
         return image;
     }
 	
-	public static void switchWindow() {
-		leftWindow.active = !leftWindow.active;
-		rightWindow.active = !rightWindow.active;
-		activeWindow = leftWindow.active ? leftWindow : rightWindow;
+	public static void switchToLeftWindow() {
+		leftWindow.active = true;
+		rightWindow.active = false;
+		activeWindow = leftWindow;
+		currentText = leftWindow.content.get(leftWindow.selectedText);
+	}
+	
+	public static void switchToRightWindow() {
+		leftWindow.active = false;
+		rightWindow.active = true;
+		activeWindow = rightWindow;
+		currentText = rightWindow.content.get(rightWindow.selectedText);
+	}
+	
+	public static void changeHighlightCursorLocation() {
+		if(activeWindow.selectedIndex < activeWindow.content.get(activeWindow.selectedText).content.length()) {			
+			activeWindow.highlightIndex = activeWindow.selectedIndex;
+			activeWindow.highlightText = activeWindow.selectedText;
+			tempCursor.visible = true;
+		}
 	}
 	
 	private void update() {
 		SCREEN_WIDTH = frame.getWidth();
 		SCREEN_HEIGHT = frame.getHeight();
+		lines = (SCREEN_HEIGHT) / 20;
+		
+		leftWindow.update();
+		rightWindow.update();
 		cursor.update();
+		tempCursor.update();
+		currentText = activeWindow.content.get(activeWindow.selectedText);
 	}
 	
 	@Override
@@ -79,6 +104,7 @@ public class Main extends JPanel implements EventListener {
 		g.setFont(font.font);
 		leftWindow.paint(g2D);
 		rightWindow.paint(g2D);
+		tempCursor.paint(g2D);
 		cursor.paint(g2D);
 	}
 	
@@ -135,10 +161,10 @@ public class Main extends JPanel implements EventListener {
 		frame.setMinimumSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		frame.setLocationRelativeTo(null);
 		frame.setUndecorated(true);
+		frame.setLocationRelativeTo(null);
 		frame.getContentPane().setBackground(Color.white);
-		frame.setResizable(false);
+		frame.setResizable(true);
 		frame.add(this);
 		frame.setVisible(true);
 		isRunning = true;

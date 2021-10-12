@@ -11,28 +11,83 @@ public class Window {
 	public int selectedText = 0;
 	public int selectedIndex = 0;
 	
-	public int windowXOffset = leftWindow ? 15 : 15 + Main.SCREEN_WIDTH/2;
+	public int windowXOffset;
 	public int windowYOffset = 25;
 	public int cursorYOffset = 11;
+	public int sideBarWidth = 61;
+	int windowRenderOffsetX;
+	
+	public int highlightText = 0;
+	public int highlightIndex = 0;
+	public int cursorYOffsetPos = 0;
+	
+	Color backgroundColor;
+	Color sidebarBackgroundColor;
+	
+	int sideBarTextOpacity;
+	int mainTextOpacity;
+	int endLine = Main.lines;
+	int startLine = 0;
+	int offset = 0;
 	
 	public Window(boolean leftWindow) {
 		this.leftWindow = leftWindow;
-		windowXOffset = leftWindow ? 15 : 15 + Main.SCREEN_WIDTH/2;
+	}
+	
+	public void update() {
+		endLine = Main.lines + offset;
+		windowXOffset = leftWindow ? 11 : 11 + Main.SCREEN_WIDTH/2;
+		windowRenderOffsetX = leftWindow ? 0 : Main.SCREEN_WIDTH/2;
+		backgroundColor = active ? new Color(25, 25, 25) : new Color(22, 22, 22);
+		sidebarBackgroundColor = active ? new Color(20, 20, 20) : new Color(20, 20, 20);
+		
+		sideBarTextOpacity = active ? 255 : 100;
+		mainTextOpacity = active ? 255 : 100;
+		
+		if(active) {			
+			if(selectedText >= endLine - 1) {
+				offset++;
+				startLine++;
+				
+				int amountToMove = (windowYOffset + ((endLine) * 20) - 5) - Main.SCREEN_HEIGHT;
+				windowYOffset -= amountToMove;
+				cursorYOffsetPos -= amountToMove;
+			}
+			
+			if(startLine != 0 && selectedText <= startLine - 1) {
+				offset--;
+				startLine--;
+				
+				int amountToMove = Main.SCREEN_HEIGHT - (windowYOffset + ((endLine) * 20) - 5);
+				
+				windowYOffset -= amountToMove;
+				cursorYOffsetPos -= amountToMove;
+			}
+		}
 	}
 	
 	public void paint(Graphics g) {
-		g.setColor(new Color(20, 20, 20));
-		if(!active) g.setColor(new Color(30, 30, 30));
+		g.setColor(backgroundColor);
+		g.fillRect(windowRenderOffsetX, 0, Main.SCREEN_WIDTH/2, Main.SCREEN_HEIGHT);
 		
-		if(leftWindow) 
-			g.fillRect(0, 0, Main.SCREEN_WIDTH / 2, Main.SCREEN_HEIGHT);
-		else 
-			g.fillRect(Main.SCREEN_WIDTH/2, 0, Main.SCREEN_WIDTH/2, Main.SCREEN_HEIGHT);
-		
-		g.setColor(new Color(200, 200, 200));
+		g.setColor(sidebarBackgroundColor);
+		g.fillRect(windowRenderOffsetX, 0, sideBarWidth, Main.SCREEN_HEIGHT);
 		
 		for(int i = 0; i < content.size(); i++) {
-			g.drawString(content.get(i).content, windowXOffset, windowYOffset + (i * 20));
+			g.setColor(new Color(200, 200, 200, mainTextOpacity));
+			g.drawString(content.get(i).content, windowXOffset + sideBarWidth, windowYOffset + (i * 20));
+			
+			int Xoffset = leftWindow ? 15 : 15 + Main.SCREEN_WIDTH/2;
+			
+			if(i >= 0 && i < 9) {
+				Xoffset += 20;
+			}
+			else if(i >= 9 && i < 99) {
+				Xoffset += 10;
+			}
+			
+			g.setColor(new Color(155, 155, 155, sideBarTextOpacity));
+			g.drawString(String.valueOf(i + 1), Xoffset, windowYOffset + (i * 20));
 		}
 	}
 }
