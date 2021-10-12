@@ -71,28 +71,28 @@ class Highlight {
 	}
 }
 
-class Text {
-	public String text;
-	public int x;
-	public int y;
-	public ArrayList<Integer> lastSpaces = new ArrayList<Integer>();
-	public ArrayList<Highlight> highlights = new ArrayList<Highlight>();
-	public boolean wrapped = false;
-	
-	public Text(int x, int y) {
-		this.x = x;
-		this.y = y;
-		this.text = "";
-		lastSpaces.add(0);
-	}
-	
-	public Text(String text, int x, int y) {
-		this.text = text;
-		this.x = x;
-		this.y = y;
-		lastSpaces.add(0);
-	}
-}
+//class Text {
+//	public String text;
+//	public int x;
+//	public int y;
+//	public ArrayList<Integer> lastSpaces = new ArrayList<Integer>();
+//	public ArrayList<Highlight> highlights = new ArrayList<Highlight>();
+//	public boolean wrapped = false;
+//	
+//	public Text(int x, int y) {
+//		this.x = x;
+//		this.y = y;
+//		this.text = "";
+//		lastSpaces.add(0);
+//	}
+//	
+//	public Text(String text, int x, int y) {
+//		this.text = text;
+//		this.x = x;
+//		this.y = y;
+//		lastSpaces.add(0);
+//	}
+//}
 
 class Command {
 	public String name;
@@ -737,7 +737,7 @@ public class MainApp extends JPanel implements EventListener{
 	}
 	
 	private void createWindow() {
-		frame = new JFrame("Text Rendering Test Engine (" + FPS + ")");
+		frame = new JFrame("Text Rendering (" + FPS + ")");
 		frame.setMinimumSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -747,9 +747,5 @@ public class MainApp extends JPanel implements EventListener{
 		frame.setResizable(false);
 		frame.add(this);
 		frame.setVisible(true);
-	}
-	
-	public static void main(String[] args) throws IOException, UnsupportedAudioFileException, LineUnavailableException {
-		new MainApp();
 	}
 }
