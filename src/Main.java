@@ -156,10 +156,10 @@ public class Main extends JPanel implements EventListener {
 	
 	private void createWindow() {
 		frame = new JFrame("Text Rendering (" + FPS + ")");
-		frame.setMinimumSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
+		frame.setMinimumSize(new Dimension(800, 600));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		frame.setUndecorated(true);
+		//frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		//frame.setUndecorated(true);
 		frame.setLocationRelativeTo(null);
 		frame.getContentPane().setBackground(Color.white);
 		frame.setResizable(true);
