@@ -6,6 +6,10 @@ public class Inputs extends KeyAdapter {
 	boolean controlDown = false;
 	boolean shiftDown = false;
 	
+	private void redoActiveContent() {
+		Main.currentText = Main.activeWindow.content.get(Main.activeWindow.selectedText);
+	}
+	
 	public void keyPressed(KeyEvent e) {
 		if(e.getKeyCode() == KeyEvent.VK_CONTROL) controlDown = true;
 		if(e.getKeyCode() == KeyEvent.VK_SHIFT) shiftDown = true;
@@ -46,7 +50,7 @@ public class Inputs extends KeyAdapter {
 				(e.getKeyCode() == 61) || (e.getKeyCode() == 151) ||
 				(e.getKeyCode() == 152) || (e.getKeyCode() == 153) ||
 				(e.getKeyCode() == 222)) {
-			if(!(e.getKeyCode() == KeyEvent.VK_SPACE && Main.activeWindow.selectedIndex == 0)) {				
+			if(!(e.getKeyCode() == KeyEvent.VK_SPACE && Main.activeWindow.selectedIndex == 0)) {
 				String content = Main.currentText.content.substring(0, Main.activeWindow.selectedIndex);
 				Main.currentText.content = content + e.getKeyChar() + Main.currentText.content.substring(Main.activeWindow.selectedIndex);
 				Main.activeWindow.selectedIndex++;
@@ -131,7 +135,8 @@ public class Inputs extends KeyAdapter {
 		if(e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
 			if(!controlDown) {			
 				if(Main.activeWindow.selectedIndex > 0) {					
-					Main.currentText.content = Main.currentText.content.substring(0, Main.currentText.content.length() - 1);
+					String content = Main.currentText.content.substring(Main.activeWindow.selectedIndex);
+					Main.currentText.content = Main.currentText.content.substring(0, Main.activeWindow.selectedIndex - 1) + content;
 					Main.activeWindow.selectedIndex--;
 					
 					if(Main.activeWindow.selectedText == Main.activeWindow.highlightText && Main.activeWindow.selectedIndex < Main.activeWindow.highlightIndex) {

@@ -32,8 +32,8 @@ public class Window {
 	}
 	
 	public void update() {
-		windowXOffset = leftWindow ? 11 : 11 + Main.SCREEN_WIDTH/2 - (sideBarWidth/4);
-		windowRenderOffsetX = leftWindow ? 0 : Main.SCREEN_WIDTH/2 - (sideBarWidth/4);
+		windowXOffset = leftWindow ? 11 : 11 + Main.SCREEN_WIDTH/2 - (sideBarWidth/7);
+		windowRenderOffsetX = leftWindow ? 0 : Main.SCREEN_WIDTH/2 - (sideBarWidth/7);
 		backgroundColor = active ? new Color(25, 25, 25) : new Color(22, 22, 22);
 		sidebarBackgroundColor = active ? new Color(20, 20, 20) : new Color(20, 20, 20);
 		
@@ -43,7 +43,7 @@ public class Window {
 	
 	public void paint(Graphics g) {
 		g.setColor(backgroundColor);
-		g.fillRect(windowRenderOffsetX + (sideBarWidth/4), 0, Main.SCREEN_WIDTH/2, Main.SCREEN_HEIGHT);
+		g.fillRect(windowRenderOffsetX, 0, Main.SCREEN_WIDTH/2, Main.SCREEN_HEIGHT);
 		
 		g.setColor(sidebarBackgroundColor);
 		g.fillRect(windowRenderOffsetX, 0, sideBarWidth, Main.SCREEN_HEIGHT);
@@ -52,7 +52,7 @@ public class Window {
 			g.setColor(new Color(200, 200, 200, mainTextOpacity));
 			g.drawString(content.get(i).content, windowXOffset + sideBarWidth, windowYOffset + (i * 20));
 			
-			int Xoffset = leftWindow ? 15 : 15 + Main.SCREEN_WIDTH/2 - (sideBarWidth/4);
+			int Xoffset = leftWindow ? 15 : 15 + Main.SCREEN_WIDTH/2 - (sideBarWidth/7);
 			
 			if(i >= 0 && i < 9) {
 				Xoffset += 20;
