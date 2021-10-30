@@ -83,7 +83,7 @@ public class Main extends JPanel implements EventListener {
 	private void update() {
 		SCREEN_WIDTH = frame.getWidth();
 		SCREEN_HEIGHT = frame.getHeight();
-		MAX_CHARACTERS_PER_LINE = ((SCREEN_WIDTH/2)-leftWindow.sideBarWidth - leftWindow.windowXOffset)/FONT_WIDTH;
+		MAX_CHARACTERS_PER_LINE = (((SCREEN_WIDTH/2)-leftWindow.sideBarWidth - leftWindow.windowXOffset)/FONT_WIDTH) - 1;
 		
 		leftWindow.update();
 		rightWindow.update();

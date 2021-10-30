@@ -6,10 +6,6 @@ public class Inputs extends KeyAdapter {
 	boolean controlDown = false;
 	boolean shiftDown = false;
 	
-	private void redoActiveContent() {
-		Main.currentText = Main.activeWindow.content.get(Main.activeWindow.selectedText);
-	}
-	
 	public void keyPressed(KeyEvent e) {
 		if(e.getKeyCode() == KeyEvent.VK_CONTROL) controlDown = true;
 		if(e.getKeyCode() == KeyEvent.VK_SHIFT) shiftDown = true;
@@ -43,18 +39,123 @@ public class Inputs extends KeyAdapter {
 		}
 	}
 	
+	private void wrapCheck(int index) {
+		while(index < Main.activeWindow.content.size()) {
+			if(Main.activeWindow.content.get(index).content.length() >= Main.MAX_CHARACTERS_PER_LINE) {				
+				int lastSpace = 0;
+				int spaceCount = 0;
+				
+				for(int i = Math.max(Main.activeWindow.content.get(index).content.length() - 1, 0); i >= 0; i--) {
+					if(Main.activeWindow.content.get(index).content.charAt(i) == ' ') {
+						spaceCount++;
+						lastSpace = i;
+					}
+				}
+				
+				if(lastSpace == 0) {
+					String wrap = Main.activeWindow.content.get(index).content.substring(Main.activeWindow.content.get(index).content.length() - 1);
+					Main.activeWindow.content.get(index).content = Main.activeWindow.content.get(index).content.substring(0, Main.activeWindow.content.get(index).content.length() - 1);
+					
+					if(index + 1 >= Main.activeWindow.content.size()) {
+						Main.activeWindow.content.add(index + 1, new Text());
+						Main.activeWindow.content.get(index + 1).content = wrap;
+						Main.activeWindow.content.get(index + 1).wrapped = true;
+					}
+					else {
+						if(Main.activeWindow.content.get(index + 1).wrapped) {
+							Main.activeWindow.content.get(index + 1).content = wrap + Main.activeWindow.content.get(index + 1).content;
+						}
+						else {
+							Main.activeWindow.content.add(index + 1, new Text());
+							Main.activeWindow.content.get(index + 1).content = wrap;
+							Main.activeWindow.content.get(index + 1).wrapped = true;
+						}
+					}
+				}
+			}
+			
+			index++;
+		}
+	}
+	
+	//(TODO) -> Finished the text wrapping which has a space at index = 0 and nowhere else
+	//(TODO) -> Go and finish the text wrapping which uses the word
+	private void wrapText() {
+		if(Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length() >= Main.MAX_CHARACTERS_PER_LINE) {
+			Text text = Main.activeWindow.content.get(Main.activeWindow.selectedText);
+			System.out.println("TEST");
+			
+			int last = nextSpace("left");
+			
+			if(last == 0) {
+				String toWrap = text.content.substring(text.content.length() - 1);
+				
+				if(Main.activeWindow.selectedIndex >= Main.MAX_CHARACTERS_PER_LINE) {
+					Main.activeWindow.selectedIndex = 1;
+					Main.activeWindow.selectedText++;
+					
+					if(Main.activeWindow.selectedText < Main.activeWindow.content.size()) {					
+						int index = Main.activeWindow.selectedText + 1;
+						wrapCheck(index);
+					}
+					else {
+						Main.activeWindow.content.add(Main.activeWindow.selectedText, new Text());
+						Main.activeWindow.content.get(Main.activeWindow.selectedText).content = toWrap;
+						Main.activeWindow.content.get(Main.activeWindow.selectedText).wrapped = true;
+					}
+				}
+				else {
+					if(Main.activeWindow.selectedText < Main.activeWindow.content.size()) {						
+						int index = Main.activeWindow.selectedText + 1;
+						
+						while(index < Main.activeWindow.content.size()) {
+							if(Main.activeWindow.content.get(index).wrapped == false) {
+								Main.activeWindow.content.add(index, new Text());
+								Main.activeWindow.content.get(index).content = toWrap;
+								Main.activeWindow.content.get(index).wrapped = true;
+								break;
+							}
+							
+							Main.activeWindow.content.get(index).content = toWrap + Main.activeWindow.content.get(index).content;
+							toWrap = Main.activeWindow.content.get(index).content.substring(Main.activeWindow.content.get(index).content.length() - 1);
+
+							if(Main.activeWindow.content.get(index).content.length() < Main.MAX_CHARACTERS_PER_LINE) {
+								break;
+							}
+							
+							Main.activeWindow.content.get(index).content = Main.activeWindow.content.get(index).content.substring(0, Main.activeWindow.content.get(index).content.length() - 1);
+							index++;
+							
+							if(index >= Main.activeWindow.content.size()) {
+								Main.activeWindow.content.add(index, new Text());
+								Main.activeWindow.content.get(index).content = toWrap;
+								Main.activeWindow.content.get(index).wrapped = true;
+							}
+						}
+					}
+					else {
+						Main.activeWindow.content.add(Main.activeWindow.selectedText + 1, new Text());
+						Main.activeWindow.content.get(Main.activeWindow.selectedText + 1).content = toWrap;
+						Main.activeWindow.content.get(Main.activeWindow.selectedText + 1).wrapped = true;
+					}
+				}
+			
+				text.content = text.content.substring(0, text.content.length() - 1);
+			}
+		}
+	}
+	
 	private void type(KeyEvent e) {
 		if((e.getKeyCode() >= 44 && e.getKeyCode() <= 57) ||
 				(e.getKeyCode() >= 65 && e.getKeyCode() <= 93) ||
 				(e.getKeyCode() == 59) || (e.getKeyCode() == 32) ||
 				(e.getKeyCode() == 61) || (e.getKeyCode() == 151) ||
 				(e.getKeyCode() == 152) || (e.getKeyCode() == 153) ||
-				(e.getKeyCode() == 222)) {
-			if(!(e.getKeyCode() == KeyEvent.VK_SPACE && Main.activeWindow.selectedIndex == 0)) {
-				String content = Main.currentText.content.substring(0, Main.activeWindow.selectedIndex);
-				Main.currentText.content = content + e.getKeyChar() + Main.currentText.content.substring(Main.activeWindow.selectedIndex);
+				(e.getKeyCode() == 222) || (e.getKeyCode() == 32)) {
+				String content = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(0, Main.activeWindow.selectedIndex);
+				Main.activeWindow.content.get(Main.activeWindow.selectedText).content = content + e.getKeyChar() + Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(Main.activeWindow.selectedIndex);
 				Main.activeWindow.selectedIndex++;
-			}
+				wrapText();
 		}
 		else if(e.getKeyCode() == KeyEvent.VK_ENTER) {
 			if(Main.activeWindow.highlightText == Main.activeWindow.selectedText && Main.activeWindow.highlightIndex >= Main.activeWindow.selectedIndex) {
@@ -180,7 +281,7 @@ public class Inputs extends KeyAdapter {
 				}
 				else {					
 					if(Main.activeWindow.selectedIndex > 0) {						
-						Main.currentText.content = Main.currentText.content.substring(0, nextLeft);
+						Main.currentText.content = Main.currentText.content.substring(0, nextLeft) + Main.currentText.content.substring(Main.activeWindow.selectedIndex);
 						Main.activeWindow.selectedIndex = nextLeft;
 					
 						if(Main.activeWindow.highlightText == Main.activeWindow.selectedText && Main.activeWindow.highlightIndex >= Main.activeWindow.selectedIndex) {
