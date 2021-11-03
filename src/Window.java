@@ -38,12 +38,13 @@ public class Window {
 		windowRenderOffsetX = leftWindow ? 0 : Main.SCREEN_WIDTH/2 - (sideBarWidth/7);
 		backgroundColor = active ? new Color(25, 25, 25) : new Color(22, 22, 22);
 		sidebarBackgroundColor = active ? new Color(20, 20, 20) : new Color(20, 20, 20);
-		textOffsetX = Math.max(0, Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1) * 11;
+		textOffsetX = Math.max(0, selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1) * 11;
 		
 		sideBarTextOpacity = active ? 255 : 100;
 		mainTextOpacity = active ? 255 : 100;
 	}
 	
+	//(TODO) -> Convert inactive window into a buffered image and display that while the other window is active
 	public void paint(Graphics g) {
 		g.setColor(backgroundColor);
 		g.fillRect(windowRenderOffsetX, 0, Main.SCREEN_WIDTH/2, Main.SCREEN_HEIGHT);
@@ -71,6 +72,6 @@ public class Window {
 		}
 		
 		g.setColor(backgroundColor);
-		g.fillRect(sideBarWidth, 0, (sideBarWidth/7), Main.SCREEN_HEIGHT);
+		//g.fillRect(sideBarWidth, 0, (sideBarWidth/7), Main.SCREEN_HEIGHT);
 	}
 }

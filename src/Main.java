@@ -1,8 +1,12 @@
+import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.RenderingHints;
+import java.awt.Robot;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +31,7 @@ public class Main extends JPanel implements EventListener {
 	int FPS;
 	int TARGET_FPS = 144;
 	boolean isRunning = false;
+	public static Robot robot;
 	JFrame frame;
 	Fonts font = new Fonts("res/SpaceMono-Regular.ttf", 18f);
 	public static Cursor cursor = new Cursor();
@@ -34,12 +39,26 @@ public class Main extends JPanel implements EventListener {
 	public static Text currentText;
 	public static TempCursor tempCursor = new TempCursor();
 	
+	public static BufferedImage leftWindowImage;
+	public static int SCREEN_RESOLUTION_WIDTH = 0;
+	public static int SCREEN_RESOLUTION_HEIGHT = 0;
+	
 	public Main() {
 		leftWindow.active = true;
 		leftWindow.content.add(new Text());
 		rightWindow.content.add(new Text());
 		currentText = leftWindow.content.get(0);
 		this.addKeyListener(new Inputs());
+		
+		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+		SCREEN_RESOLUTION_WIDTH = gd.getDisplayMode().getWidth();
+		SCREEN_RESOLUTION_HEIGHT = gd.getDisplayMode().getHeight();
+		
+		try {
+			robot = new Robot();
+		} catch (AWTException e) {
+			e.printStackTrace();
+		}
 		
 		createWindow();
 		run();
@@ -68,6 +87,22 @@ public class Main extends JPanel implements EventListener {
 	public static void switchToRightWindow() {
 		leftWindow.active = false;
 		rightWindow.active = true;
+		
+		int leftEdge = Main.SCREEN_RESOLUTION_WIDTH/2 - Main.SCREEN_WIDTH/2 + 10;
+		int topEdge = Main.SCREEN_RESOLUTION_HEIGHT/2 - Main.SCREEN_HEIGHT/2 + 10;
+		
+		leftWindowImage = new BufferedImage(Main.SCREEN_WIDTH/2 - (Main.activeWindow.sideBarWidth/7), Main.SCREEN_HEIGHT, BufferedImage.TYPE_INT_ARGB);
+		Color pixelColor = null;
+
+		for(int x = 0; x < leftWindowImage.getWidth(); x++) {
+			for(int y = 0; y < leftWindowImage.getHeight(); y++) {
+				pixelColor = robot.getPixelColor(leftEdge + x, topEdge + y);
+				leftWindowImage.setRGB(x, y, pixelColor.getRGB());
+			}
+		}
+		
+		System.out.println(pixelColor);
+		
 		activeWindow = rightWindow;
 		currentText = rightWindow.content.get(rightWindow.selectedText);
 	}
@@ -102,8 +137,16 @@ public class Main extends JPanel implements EventListener {
 		g.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 		
 		g.setFont(font.font);
-		leftWindow.paint(g2D);
-		rightWindow.paint(g2D);
+		
+		if(leftWindow == activeWindow) {
+			leftWindow.paint(g2D);
+			//rightWindow.paint(g2D);
+		}
+		else {			
+			rightWindow.paint(g2D);
+			//leftWindow.paint(g2D);
+			g.drawImage(leftWindowImage, 0, 0, Main.SCREEN_WIDTH/2 - (Main.activeWindow.sideBarWidth/7), Main.SCREEN_HEIGHT, null);
+		}
 		tempCursor.paint(g2D);
 		cursor.paint(g2D);
 	}
