@@ -35,7 +35,6 @@ public class Window {
 		this.leftWindow = leftWindow;
 	}
 	
-	//(TODO) -> animate the text when scrolling horizontally!
 	public void update() {
 		windowXOffset = leftWindow ? 11 : 11 + Main.SCREEN_WIDTH/2 - (sideBarWidth/7);
 		windowRenderOffsetX = leftWindow ? 0 : Main.SCREEN_WIDTH/2 - (sideBarWidth/7);
