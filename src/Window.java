@@ -41,7 +41,7 @@ public class Window {
 		windowRenderOffsetX = leftWindow ? 0 : Main.SCREEN_WIDTH/2 - (sideBarWidth/7);
 		backgroundColor = active ? new Color(25, 25, 25) : new Color(22, 22, 22);
 		sidebarBackgroundColor = active ? new Color(20, 20, 20) : new Color(20, 20, 20);
-		cursorIndex = selectedIndex - selectedLeftIndex;
+		cursorIndex = Math.abs(selectedIndex - selectedLeftIndex);
 		
 		sideBarTextOpacity = active ? 255 : 100;
 		mainTextOpacity = active ? 255 : 100;

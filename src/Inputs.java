@@ -185,19 +185,14 @@ public class Inputs extends KeyAdapter {
 			if (!controlDown) {
 				if (Main.activeWindow.selectedIndex > 0) {
 					String content = Main.currentText.content.substring(Main.activeWindow.selectedIndex);
-					Main.currentText.content = Main.currentText.content.substring(0,
-							Main.activeWindow.selectedIndex - 1) + content;
+					Main.currentText.content = Main.currentText.content.substring(0, Main.activeWindow.selectedIndex - 1) + content;
 					Main.activeWindow.selectedIndex--;
-
+					if(Main.activeWindow.selectedLeftIndex > 0) Main.activeWindow.selectedLeftIndex--;
+					
 					if (Main.activeWindow.selectedText == Main.activeWindow.highlightText
 							&& Main.activeWindow.selectedIndex < Main.activeWindow.highlightIndex) {
 						Main.tempCursor.visible = false;
-					}
-
-					if (Main.activeWindow.selectedIndex < Main.activeWindow.selectedLeftIndex) {
-						Main.activeWindow.selectedLeftIndex = Math.max(0,
-								Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
-					}
+					}					
 				} else {
 					if (Main.activeWindow.selectedText > 0) {
 						if (Main.activeWindow.selectedText == Main.activeWindow.highlightText
