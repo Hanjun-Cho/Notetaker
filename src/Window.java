@@ -21,12 +21,15 @@ public class Window {
 	public int highlightText = 0;
 	public int highlightIndex = 0;
 	public int cursorYOffsetPos = 0;
+	public int cursorIndex = 0;
 	
 	Color backgroundColor;
 	Color sidebarBackgroundColor;
 	
 	int sideBarTextOpacity;
 	int mainTextOpacity;
+	int targetTextOffsetX;
+	public int selectedLeftIndex = 0;
 	
 	public Window(boolean leftWindow) {
 		this.leftWindow = leftWindow;
@@ -38,25 +41,41 @@ public class Window {
 		windowRenderOffsetX = leftWindow ? 0 : Main.SCREEN_WIDTH/2 - (sideBarWidth/7);
 		backgroundColor = active ? new Color(25, 25, 25) : new Color(22, 22, 22);
 		sidebarBackgroundColor = active ? new Color(20, 20, 20) : new Color(20, 20, 20);
-		textOffsetX = Math.max(0, selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1) * 11;
+		cursorIndex = selectedIndex - selectedLeftIndex;
 		
 		sideBarTextOpacity = active ? 255 : 100;
 		mainTextOpacity = active ? 255 : 100;
+		targetTextOffsetX = Math.max(0, selectedLeftIndex) * 11;
+		textOffsetX = (int)Main.Lerp(textOffsetX, targetTextOffsetX, 0.5f);
 	}
 	
-	//(TODO) -> Convert inactive window into a buffered image and display that while the other window is active
-	public void paint(Graphics g) {
+	public void paintBackground(Graphics g) {
 		g.setColor(backgroundColor);
 		g.fillRect(windowRenderOffsetX, 0, Main.SCREEN_WIDTH/2, Main.SCREEN_HEIGHT);
-		
+	}
+	
+	public void paintContent(Graphics g) {
 		for(int i = 0; i < content.size(); i++) {
 			g.setColor(new Color(200, 200, 200, mainTextOpacity));
-			g.drawString(content.get(i).content, windowXOffset + sideBarWidth - textOffsetX, windowYOffset + (i * 20));
+
+			if(this == Main.rightWindow) {
+				if(active) g.drawString(content.get(i).content, windowXOffset + sideBarWidth - textOffsetX, windowYOffset + (i * 20));
+				if(!active) g.drawString(content.get(i).content.substring(Math.max(0, selectedLeftIndex - 1)), 
+						0 > selectedLeftIndex - 1 ? windowXOffset + sideBarWidth - textOffsetX : windowXOffset + sideBarWidth - Main.FONT_WIDTH, windowYOffset + (i * 20));
+			}
+			else {
+				if(active) g.drawString(content.get(i).content, windowXOffset + sideBarWidth - textOffsetX, windowYOffset + (i * 20));
+				if(!active) g.drawString(content.get(i).content.substring(0, Math.min(content.get(i).content.length(), selectedLeftIndex + Main.MAX_CHARACTERS_PER_LINE + 1)), windowXOffset + sideBarWidth - textOffsetX, windowYOffset + (i * 20));
+			}
 		}
-		
+	}
+	
+	public void paintSideBarBackground(Graphics g) {
 		g.setColor(sidebarBackgroundColor);
 		g.fillRect(windowRenderOffsetX, 0, sideBarWidth, Main.SCREEN_HEIGHT);
-		
+	}
+	
+	public void paintSideBarText(Graphics g) {
 		for(int i = 0; i < content.size(); i++) {
 			int Xoffset = leftWindow ? 15 : 15 + Main.SCREEN_WIDTH/2 - (sideBarWidth/7);
 			
@@ -70,8 +89,13 @@ public class Window {
 			g.setColor(new Color(155, 155, 155, sideBarTextOpacity));
 			g.drawString(String.valueOf(i + 1), Xoffset, windowYOffset + (i * 20));
 		}
-		
-		g.setColor(backgroundColor);
-		//g.fillRect(sideBarWidth, 0, (sideBarWidth/7), Main.SCREEN_HEIGHT);
+	}
+	
+	//(TODO) -> Convert inactive window into a buffered image and display that while the other window is active <- BAD IDEA FUCKING DUMBASS
+	public void paint(Graphics g) {
+		paintBackground(g);
+		paintContent(g);
+		paintSideBarBackground(g);
+		paintSideBarText(g);
 	}
 }

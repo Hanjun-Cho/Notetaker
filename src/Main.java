@@ -87,22 +87,6 @@ public class Main extends JPanel implements EventListener {
 	public static void switchToRightWindow() {
 		leftWindow.active = false;
 		rightWindow.active = true;
-		
-		int leftEdge = Main.SCREEN_RESOLUTION_WIDTH/2 - Main.SCREEN_WIDTH/2 + 10;
-		int topEdge = Main.SCREEN_RESOLUTION_HEIGHT/2 - Main.SCREEN_HEIGHT/2 + 10;
-		
-		leftWindowImage = new BufferedImage(Main.SCREEN_WIDTH/2 - (Main.activeWindow.sideBarWidth/7), Main.SCREEN_HEIGHT, BufferedImage.TYPE_INT_ARGB);
-		Color pixelColor = null;
-
-		for(int x = 0; x < leftWindowImage.getWidth(); x++) {
-			for(int y = 0; y < leftWindowImage.getHeight(); y++) {
-				pixelColor = robot.getPixelColor(leftEdge + x, topEdge + y);
-				leftWindowImage.setRGB(x, y, pixelColor.getRGB());
-			}
-		}
-		
-		System.out.println(pixelColor);
-		
 		activeWindow = rightWindow;
 		currentText = rightWindow.content.get(rightWindow.selectedText);
 	}
@@ -140,12 +124,11 @@ public class Main extends JPanel implements EventListener {
 		
 		if(leftWindow == activeWindow) {
 			leftWindow.paint(g2D);
-			//rightWindow.paint(g2D);
-		}
-		else {			
 			rightWindow.paint(g2D);
-			//leftWindow.paint(g2D);
-			g.drawImage(leftWindowImage, 0, 0, Main.SCREEN_WIDTH/2 - (Main.activeWindow.sideBarWidth/7), Main.SCREEN_HEIGHT, null);
+		}
+		else {		
+			rightWindow.paint(g2D);
+			leftWindow.paint(g2D);
 		}
 		tempCursor.paint(g2D);
 		cursor.paint(g2D);
