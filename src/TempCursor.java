@@ -9,8 +9,6 @@ public class TempCursor {
 	public int cursorX;
 	public int cursorY;
 	
-	public boolean visible = true;
-	
 	public TempCursor() {
 		try {
 			texture = Main.loadImage("res/TempCursor.png");
@@ -25,6 +23,6 @@ public class TempCursor {
 	}
 	
 	public void paint(Graphics g) {
-		if(visible) g.drawImage(texture, cursorX, cursorY, 10, 20, null, null);
+		g.drawImage(texture, cursorX, cursorY, 10, 20, null, null);
 	}
 }

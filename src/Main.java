@@ -18,10 +18,12 @@ import javax.swing.JPanel;
 
 public class Main extends JPanel implements EventListener {
 	
+	//FIX THE FUCKING RESIZE
 	private static final long serialVersionUID = 1L;
 	public static int SCREEN_WIDTH = 1920;
 	public static int SCREEN_HEIGHT = 1080;
 	public static int FONT_WIDTH = 11;
+	public static int LINE_HEIGHT = 20;
 	public static int MAX_CHARACTERS_PER_LINE;
 	
 	static Window leftWindow = new Window(true);
@@ -33,7 +35,7 @@ public class Main extends JPanel implements EventListener {
 	boolean isRunning = false;
 	public static Robot robot;
 	JFrame frame;
-	Fonts font = new Fonts("res/SpaceMono-Regular.ttf", 18f);
+	Fonts font = new Fonts(Settings.fontPath, 18f);
 	public static Cursor cursor = new Cursor();
 	static Graphics graphics;
 	public static Text currentText;
@@ -44,6 +46,7 @@ public class Main extends JPanel implements EventListener {
 	public static int SCREEN_RESOLUTION_HEIGHT = 0;
 	
 	public Main() {
+		new Settings();
 		leftWindow.active = true;
 		leftWindow.content.add(new Text());
 		rightWindow.content.add(new Text());
@@ -95,7 +98,6 @@ public class Main extends JPanel implements EventListener {
 		if(activeWindow.selectedIndex < activeWindow.content.get(activeWindow.selectedText).content.length()) {			
 			activeWindow.highlightIndex = activeWindow.selectedIndex;
 			activeWindow.highlightText = activeWindow.selectedText;
-			tempCursor.visible = true;
 		}
 	}
 	
@@ -184,13 +186,13 @@ public class Main extends JPanel implements EventListener {
 	
 	private void createWindow() {
 		frame = new JFrame("Text Rendering (" + FPS + ")");
-		frame.setMinimumSize(new Dimension(800, 600));
+		frame.setMinimumSize(new Dimension(1920, 1080));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		//frame.setUndecorated(true);
 		frame.setLocationRelativeTo(null);
 		frame.getContentPane().setBackground(Color.white);
-		frame.setResizable(true);
+		frame.setResizable(false);
 		frame.add(this);
 		frame.setVisible(true);
 		isRunning = true;

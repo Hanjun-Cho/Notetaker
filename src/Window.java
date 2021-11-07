@@ -20,7 +20,6 @@ public class Window {
 	
 	public int highlightText = 0;
 	public int highlightIndex = 0;
-	public int cursorYOffsetPos = 0;
 	public int cursorIndex = 0;
 	
 	Color backgroundColor;
@@ -30,6 +29,7 @@ public class Window {
 	int mainTextOpacity;
 	int targetTextOffsetX;
 	public int selectedLeftIndex = 0;
+	public int startCursorPosition = 0;
 	
 	public Window(boolean leftWindow) {
 		this.leftWindow = leftWindow;
@@ -40,7 +40,8 @@ public class Window {
 		windowRenderOffsetX = leftWindow ? 0 : Main.SCREEN_WIDTH/2 - (sideBarWidth/7);
 		backgroundColor = active ? new Color(25, 25, 25) : new Color(22, 22, 22);
 		sidebarBackgroundColor = active ? new Color(20, 20, 20) : new Color(20, 20, 20);
-		cursorIndex = Math.abs(selectedIndex - selectedLeftIndex);
+		cursorIndex = selectedIndex - selectedLeftIndex;
+		startCursorPosition = windowXOffset + sideBarWidth;
 		
 		sideBarTextOpacity = active ? 255 : 100;
 		mainTextOpacity = active ? 255 : 100;

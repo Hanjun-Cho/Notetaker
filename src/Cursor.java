@@ -5,23 +5,36 @@ import java.io.IOException;
 public class Cursor {
 
 	public BufferedImage texture;
-	
 	public int cursorX;
 	public int cursorY;
 	
 	public Cursor() {
+		importTexture();
+	}
+	
+	private void importTexture() {
 		try {
-			texture = Main.loadImage("res/Cursor.png");
+			texture = Main.loadImage(Settings.cursorTexturePath);
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		}	
 	}
 	
 	public void update() {
-		int targetX = Main.activeWindow.selectedIndex == 0 ? Main.activeWindow.windowXOffset + Main.activeWindow.sideBarWidth : Math.min(Main.activeWindow.windowXOffset + Main.activeWindow.sideBarWidth + (Main.FONT_WIDTH * Main.activeWindow.cursorIndex) + 2, Main.activeWindow.windowXOffset + Main.activeWindow.sideBarWidth + ((Main.MAX_CHARACTERS_PER_LINE - 1) * Main.FONT_WIDTH) + 2);
-		int targetY = Main.activeWindow.cursorYOffset + (20 * Main.activeWindow.selectedText) + Main.activeWindow.cursorYOffsetPos;
-		cursorX = (int)Main.Lerp(cursorX, targetX, 0.5f);
-		cursorY = (int)Main.Lerp(cursorY, targetY, 0.5f);
+		moveCursor();
+	}
+	
+	private void moveCursor() {
+		//movePos -> position of cursor if the cursor is moving
+		//endPos -> position of cursor if the cursor is stationary at the end of the line
+		int movePos = Main.activeWindow.startCursorPosition + (Main.FONT_WIDTH * Main.activeWindow.cursorIndex) + 2;
+		int endPos = Main.activeWindow.startCursorPosition + ((Main.MAX_CHARACTERS_PER_LINE - 1) * Main.FONT_WIDTH) + 2;
+		
+		//for targetX, there is a 2 pixel offset at index 0 and is completely fine everywhere else, so the first part is necessary, dont remove...
+		int targetX = Main.activeWindow.selectedIndex == 0 ? Main.activeWindow.startCursorPosition : Math.min(movePos, endPos);
+		int targetY = Main.activeWindow.cursorYOffset + (Main.LINE_HEIGHT * Main.activeWindow.selectedText);
+		cursorX = (int)Main.Lerp(cursorX, targetX, Settings.cursorXLerpSpeed);
+		cursorY = (int)Main.Lerp(cursorY, targetY, Settings.cursorYLerpSpeed);
 	}
 	
 	public void paint(Graphics g) {
