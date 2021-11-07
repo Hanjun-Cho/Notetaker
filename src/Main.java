@@ -26,6 +26,7 @@ public class Main extends JPanel implements EventListener {
 	public static int SCREEN_RESOLUTION_WIDTH = 0;
 	public static int SCREEN_RESOLUTION_HEIGHT = 0;
 	public static int TARGET_FPS = 144;
+	public static int SCREEN_DPI = java.awt.Toolkit.getDefaultToolkit().getScreenResolution();
 	
 	private static Window leftWindow = new Window(true);
 	private static Window rightWindow = new Window(false);
@@ -43,7 +44,7 @@ public class Main extends JPanel implements EventListener {
 		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 		SCREEN_RESOLUTION_WIDTH = gd.getDisplayMode().getWidth();
 		SCREEN_RESOLUTION_HEIGHT = gd.getDisplayMode().getHeight();
-		
+
 		createWindow();
 		run();
 	}
@@ -79,7 +80,7 @@ public class Main extends JPanel implements EventListener {
 		g.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 		
 		g.setFont(font.font);
-		
+
 		if(leftWindow == activeWindow) {
 			leftWindow.paint(g2D);
 			rightWindow.paint(g2D);
@@ -139,7 +140,7 @@ public class Main extends JPanel implements EventListener {
 		//frame.setUndecorated(true);
 		frame.setLocationRelativeTo(null);
 		frame.getContentPane().setBackground(Color.white);
-		frame.setResizable(false);
+		frame.setResizable(true);
 		frame.add(this);
 		frame.setVisible(true);
 		isRunning = true;
