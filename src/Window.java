@@ -33,6 +33,7 @@ public class Window {
 	}
 	
 	public void update() {
+		selectedLeftIndex = Math.max(0, selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
 		windowXOffset = leftWindow ? 11 : 11 + Main.SCREEN_WIDTH/2 - (sideBarWidth/7);
 		backgroundColor = active ? new Color(25, 25, 25) : new Color(22, 22, 22);
 		sidebarBackgroundColor = active ? new Color(20, 20, 20) : new Color(20, 20, 20);

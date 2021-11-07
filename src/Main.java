@@ -38,6 +38,7 @@ public class Main extends JPanel implements EventListener {
 	
 	public Main() {
 		new Settings();
+		setFocusTraversalKeysEnabled(false);
 		this.addKeyListener(new Inputs());
 		
 		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
@@ -139,7 +140,7 @@ public class Main extends JPanel implements EventListener {
 		//frame.setUndecorated(true);
 		frame.setLocationRelativeTo(null);
 		frame.getContentPane().setBackground(Color.white);
-		frame.setResizable(false);
+		frame.setResizable(true);
 		frame.add(this);
 		frame.setVisible(true);
 		isRunning = true;

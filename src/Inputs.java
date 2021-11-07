@@ -3,6 +3,7 @@ import java.awt.event.KeyEvent;
 
 public class Inputs extends KeyAdapter {
 	
+	private String TAB = "    ";
 	private boolean controlDown = false;
 	private boolean shiftDown = false;
 	private boolean shortcut = false;
@@ -90,6 +91,17 @@ public class Inputs extends KeyAdapter {
 			if (((Main.activeWindow.selectedIndex < Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length())) && Main.activeWindow.cursorIndex < Main.MAX_CHARACTERS_PER_LINE - 1) Main.activeWindow.selectedLeftIndex--;
 		} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 			createNewLine();
+		} 
+		else if(e.getKeyCode() == KeyEvent.VK_TAB) {
+			//next 3 lines are straight-forward, you basically just add in the TAB characters entered right between the text
+			String content = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(0, Main.activeWindow.selectedIndex);
+			Main.activeWindow.content.get(Main.activeWindow.selectedText).content = content + TAB + Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(Main.activeWindow.selectedIndex);
+			Main.activeWindow.selectedIndex += TAB.length();
+			
+			//no idea why this work but it does so I'll keep it
+			if ((Main.activeWindow.selectedIndex > Main.MAX_CHARACTERS_PER_LINE - 1)) Main.activeWindow.selectedLeftIndex += Math.max(0, Main.activeWindow.selectedIndex - (Main.MAX_CHARACTERS_PER_LINE - 1));
+			if (((Main.activeWindow.selectedIndex < Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length())) && Main.activeWindow.cursorIndex < Main.MAX_CHARACTERS_PER_LINE - 1) Main.activeWindow.selectedLeftIndex -= Math.max(0, Main.activeWindow.selectedIndex - (Main.MAX_CHARACTERS_PER_LINE - 1));
+			
 		}
 	}
 	
@@ -130,12 +142,15 @@ public class Inputs extends KeyAdapter {
 	private int nextSpace(String direction) {
 		if (direction.equals("right")) {
 			if (Main.activeWindow.selectedIndex < Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length()) {
-				for (int i = Main.activeWindow.selectedIndex + 1; i < Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length(); i++) {
-					if (Main.activeWindow.content.get(Main.activeWindow.selectedText).content.charAt(i) == ' ') {
+				int i = Main.activeWindow.selectedIndex + 1;
+				
+				for(; i < Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length() - 1; i++) {
+					if(Main.activeWindow.content.get(Main.activeWindow.selectedText).content.charAt(i) == ' ' && 
+							Main.activeWindow.content.get(Main.activeWindow.selectedText).content.charAt(i - 1) != ' ') {
 						return i;
 					}
 				}
-
+				
 				return Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length();
 			} else {
 				if (Main.activeWindow.selectedText < Main.activeWindow.content.size() - 1) {
@@ -147,12 +162,15 @@ public class Inputs extends KeyAdapter {
 			}
 		} else if (direction.equals("left") || direction.equals("leftdel")) {
 			if (Main.activeWindow.selectedIndex != 0) {
-				for (int i = Math.max(Main.activeWindow.selectedIndex - 1, 0); i >= 0; i--) {
-					if (Main.activeWindow.content.get(Main.activeWindow.selectedText).content.charAt(i) == ' ') {
+				int i = Math.max(Main.activeWindow.selectedIndex - 1, 0);
+				
+				for(; i > 0; i--) {
+					if(Main.activeWindow.content.get(Main.activeWindow.selectedText).content.charAt(i) == ' ' && 
+							Main.activeWindow.content.get(Main.activeWindow.selectedText).content.charAt(i - 1) != ' ') {
 						return i;
 					}
 				}
-
+				
 				return 0;
 			} else {
 				if (Main.activeWindow.selectedText > 0 && !direction.equals("leftdel")) {
