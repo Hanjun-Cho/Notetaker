@@ -3,9 +3,9 @@ import java.awt.event.KeyEvent;
 
 public class Inputs extends KeyAdapter {
 	
-	boolean controlDown = false;
-	boolean shiftDown = false;
-	boolean shortcut = false;
+	private boolean controlDown = false;
+	private boolean shiftDown = false;
+	private boolean shortcut = false;
 
 	public void keyPressed(KeyEvent e) {
 		shortcut = false;
@@ -55,10 +55,6 @@ public class Inputs extends KeyAdapter {
 			deleteLine();
 			shortcut = true;
 		}
-		if (controlDown && shiftDown && e.getKeyChar() == KeyEvent.VK_SPACE) {
-			Main.changeHighlightCursorLocation();
-			shortcut = true;
-		}
 	}
 
 	private void deleteLine() {
@@ -100,8 +96,8 @@ public class Inputs extends KeyAdapter {
 	private void createNewLine() {
 		//first 2 lines make sure that we cut off the current line where we pressed enter so the content after that index is saved
 		//we then create a new line and past that content in and increment the values we need to increment
-		String content = Main.currentText.content.substring(Main.activeWindow.selectedIndex);
-		Main.currentText.content = Main.currentText.content.substring(0, Main.activeWindow.selectedIndex);
+		String content = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(Main.activeWindow.selectedIndex);
+		Main.activeWindow.content.get(Main.activeWindow.selectedText).content = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(0, Main.activeWindow.selectedIndex);
 		Main.activeWindow.content.add(Main.activeWindow.selectedText + 1, new Text());
 		Main.activeWindow.content.get(Main.activeWindow.selectedText + 1).content = content;
 		Main.activeWindow.selectedText++;
@@ -133,20 +129,20 @@ public class Inputs extends KeyAdapter {
 
 	private int nextSpace(String direction) {
 		if (direction.equals("right")) {
-			if (Main.activeWindow.selectedIndex < Main.currentText.content.length()) {
-				for (int i = Main.activeWindow.selectedIndex + 1; i < Main.currentText.content.length(); i++) {
+			if (Main.activeWindow.selectedIndex < Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length()) {
+				for (int i = Main.activeWindow.selectedIndex + 1; i < Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length(); i++) {
 					if (Main.activeWindow.content.get(Main.activeWindow.selectedText).content.charAt(i) == ' ') {
 						return i;
 					}
 				}
 
-				return Main.currentText.content.length();
+				return Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length();
 			} else {
 				if (Main.activeWindow.selectedText < Main.activeWindow.content.size() - 1) {
 					Main.activeWindow.selectedText++;
 					return 0;
 				} else {
-					return Main.currentText.content.length();
+					return Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length();
 				}
 			}
 		} else if (direction.equals("left") || direction.equals("leftdel")) {
@@ -198,8 +194,8 @@ public class Inputs extends KeyAdapter {
 	private void deleteCharacter() {
 		if (Main.activeWindow.selectedIndex > 0) {
 			//if there is stuff to delete, just delete that character and adjust the variables
-			String content = Main.currentText.content.substring(Main.activeWindow.selectedIndex);
-			Main.currentText.content = Main.currentText.content.substring(0, Main.activeWindow.selectedIndex - 1) + content;
+			String content = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(Main.activeWindow.selectedIndex);
+			Main.activeWindow.content.get(Main.activeWindow.selectedText).content = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(0, Main.activeWindow.selectedIndex - 1) + content;
 			Main.activeWindow.selectedIndex--;
 			if(Main.activeWindow.selectedLeftIndex > 0) Main.activeWindow.selectedLeftIndex--;		
 		} else {
@@ -254,12 +250,13 @@ public class Inputs extends KeyAdapter {
 		} else {
 			if (Main.activeWindow.selectedIndex > 0) {
 				//if are words remaining behind, it just removes it and changes the index
-				Main.currentText.content = Main.currentText.content.substring(0, nextLeft) + Main.currentText.content.substring(Main.activeWindow.selectedIndex);
+				Main.activeWindow.content.get(Main.activeWindow.selectedText).content = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(0, nextLeft) + 
+						Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(Main.activeWindow.selectedIndex);
 				Main.activeWindow.selectedIndex = nextLeft;
 				if (Main.activeWindow.selectedIndex < Main.activeWindow.selectedLeftIndex) Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
 			} else {
 				//if no more words left, just makes content into nothing
-				Main.currentText.content = "";
+				Main.activeWindow.content.get(Main.activeWindow.selectedText).content = "";
 				Main.activeWindow.selectedIndex = 0;
 				Main.activeWindow.selectedLeftIndex = 0;
 			}
@@ -269,7 +266,7 @@ public class Inputs extends KeyAdapter {
 	private void moveRight() {
 		if (!controlDown) {
 			//everything here is done by character
-			if (Main.activeWindow.selectedIndex < Main.currentText.content.length()) {
+			if (Main.activeWindow.selectedIndex < Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length()) {
 				//if the current index is less than the length of the whole line, it just increments the index so that it moves along
 				Main.activeWindow.selectedIndex++;
 				if (Main.activeWindow.selectedIndex > Main.activeWindow.selectedLeftIndex + Main.MAX_CHARACTERS_PER_LINE - 1) Main.activeWindow.selectedLeftIndex++;
@@ -288,7 +285,7 @@ public class Inputs extends KeyAdapter {
 			//indexes are adjusted
 			int nextRight = nextSpace("right");
 			Main.activeWindow.selectedIndex = nextRight;
-			if (Main.activeWindow.selectedIndex > Main.activeWindow.selectedLeftIndex + Main.MAX_CHARACTERS_PER_LINE - 1) Main.activeWindow.selectedLeftIndex = Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1;
+			Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
 		}
 	}
 	

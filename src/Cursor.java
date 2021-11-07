@@ -33,8 +33,8 @@ public class Cursor {
 		//for targetX, there is a 2 pixel offset at index 0 and is completely fine everywhere else, so the first part is necessary, dont remove...
 		int targetX = Main.activeWindow.selectedIndex == 0 ? Main.activeWindow.startCursorPosition : Math.min(movePos, endPos);
 		int targetY = Main.activeWindow.cursorYOffset + (Main.LINE_HEIGHT * Main.activeWindow.selectedText);
-		cursorX = (int)Main.Lerp(cursorX, targetX, Settings.cursorXLerpSpeed);
-		cursorY = (int)Main.Lerp(cursorY, targetY, Settings.cursorYLerpSpeed);
+		cursorX = (int)Maths.Lerp(cursorX, targetX, Settings.cursorXLerpSpeed);
+		cursorY = (int)Maths.Lerp(cursorY, targetY, Settings.cursorYLerpSpeed);
 	}
 	
 	public void paint(Graphics g) {
