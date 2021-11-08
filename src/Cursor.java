@@ -62,11 +62,8 @@ public class Cursor {
 			int movePos = Main.activeWindow.startCursorPosition + (Main.FONT_WIDTH * Main.activeWindow.highlightSelectedIndex) + 2;
 			int endPos = Main.activeWindow.startCursorPosition + ((Main.MAX_CHARACTERS_PER_LINE - 1) * Main.FONT_WIDTH) + 2;
 			
-			//for targetX, there is a 2 pixel offset at index 0 and is completely fine everywhere else, so the first part is necessary, dont remove...
-			int targetX = Main.activeWindow.highlightSelectedIndex == 0 ? Main.activeWindow.startCursorPosition : Math.min(movePos, endPos);
-			int targetY = Main.activeWindow.cursorYOffset + (Main.LINE_HEIGHT * Main.activeWindow.highlightSelectedText);
-			cursorX = (int)Maths.Lerp(cursorX, targetX, Settings.cursorXLerpSpeed);
-			cursorY = (int)Maths.Lerp(cursorY, targetY, Settings.cursorYLerpSpeed);
+			cursorX = Main.activeWindow.highlightSelectedIndex == 0 ? Main.activeWindow.startCursorPosition : Math.min(movePos, endPos);
+			cursorY = Main.activeWindow.cursorYOffset + (Main.LINE_HEIGHT * Main.activeWindow.highlightSelectedText);
 		}
 	}
 	

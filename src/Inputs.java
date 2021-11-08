@@ -1,65 +1,94 @@
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 
 public class Inputs extends KeyAdapter {
 	
 	private String TAB = "    ";
-	private boolean controlDown = false;
-	private boolean shiftDown = false;
 	private boolean shortcut = false;
 
 	public void keyPressed(KeyEvent e) {
 		shortcut = false;
 		
-		if (e.getKeyCode() == KeyEvent.VK_CONTROL && !controlDown) {			
-			controlDown = true;
-		}
-		
-		if (e.getKeyCode() == KeyEvent.VK_SHIFT && !shiftDown) {
-			shiftDown = true;
-		}
-		
 		shortcuts(e);
 
 		if (!shortcut) {
-			if (!controlDown) {
+			if (!e.isControlDown()) {
 				type(e);				
 			}
 			
-			if (!shiftDown) {				
+			if (!e.isShiftDown()) {				
 				move(e);
 				delete(e);
 			}
 		}
 	}
-
-	public void keyReleased(KeyEvent e) {
-		if (e.getKeyCode() == KeyEvent.VK_CONTROL) {			
-			controlDown = false;
-		}
 	
-		if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
-			shiftDown = false;
+	private void shortcuts(KeyEvent e) {
+		for(int i = 0; i < Settings.commands.length; i++) {
+			ArrayList<String> shortcut = new ArrayList<String>();
+			
+			for(int j = 0; j < Settings.shortcuts[i].size(); j++) {
+				shortcut.add(Settings.shortcuts[i].get(j));
+			}
+			
+			if((shortcut.contains("CTRL") && !e.isControlDown()) || (!shortcut.contains("CTRL") && e.isControlDown())) {
+				i++;
+			}
+			else {
+				if(shortcut.contains("CTRL")) shortcut.remove(shortcut.indexOf("CTRL"));
+			}
+			
+			if((shortcut.contains("SHIFT") && !e.isShiftDown()) || (!shortcut.contains("SHIFT") && e.isShiftDown())) {
+				i++;
+			}
+			else {
+				if(shortcut.contains("SHIFT")) shortcut.remove(shortcut.indexOf("SHIFT"));
+			}
+			
+			boolean hasAll = true;
+			
+			for(int j = 0; j < shortcut.size(); j++) {
+				if(Settings.convert.contains(shortcut.get(j))) {
+					if(e.getKeyCode() != Settings.converter.get(shortcut.get(j))) {
+						hasAll = false;
+						break;
+					}
+				}
+				else {
+					hasAll= false;
+					break;
+				}
+			}
+			
+			if(hasAll) executeShortcut(Settings.commands[i]);
 		}
 	}
-
-	private void shortcuts(KeyEvent e) {
-		if (controlDown && shiftDown && e.getKeyCode() == KeyEvent.VK_RIGHT) {
+	
+	private void executeShortcut(String command) {
+		if(command.equals("switchToRightWindow")) {
 			Main.switchToRightWindow();
 			shortcut = true;
+			return;
 		}
-		if (controlDown && shiftDown && e.getKeyCode() == KeyEvent.VK_LEFT) {
+		
+		if(command.equals("switchToLeftWindow")) {
 			Main.switchToLeftWindow();
 			shortcut = true;
+			return;
 		}
-		if (controlDown && shiftDown && e.getKeyCode() == KeyEvent.VK_D) {
+		
+		if(command.equals("deleteLine")) {
 			deleteLine();
 			shortcut = true;
+			return;
 		}
-		if(controlDown && shiftDown && e.getKeyCode() == KeyEvent.VK_SPACE) {
+		
+		if(command.equals("changeHighlightStartPosition")) {
 			Main.activeWindow.highlightSelectedIndex = Main.activeWindow.selectedIndex;
 			Main.activeWindow.highlightSelectedText = Main.activeWindow.selectedText;
 			shortcut = true;
+			return;
 		}
 	}
 
@@ -124,19 +153,19 @@ public class Inputs extends KeyAdapter {
 	
 	private void move(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-			moveRight();
+			moveRight(e);
 		} else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-			moveLeft();
+			moveLeft(e);
 		} else if (e.getKeyCode() == KeyEvent.VK_UP) {
-			moveUp();
+			moveUp(e);
 		} else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-			moveDown();
+			moveDown(e);
 		}
 	}
 
 	private void delete(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-			if (!controlDown) {
+			if (!e.isControlDown()) {
 				deleteCharacter();
 			} else {
 				deleteWord();
@@ -286,8 +315,8 @@ public class Inputs extends KeyAdapter {
 		}
 	}
 	
-	private void moveRight() {
-		if (!controlDown) {
+	private void moveRight(KeyEvent e) {
+		if (!e.isControlDown()) {
 			//everything here is done by character
 			if (Main.activeWindow.selectedIndex < Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length()) {
 				//if the current index is less than the length of the whole line, it just increments the index so that it moves along
@@ -312,8 +341,8 @@ public class Inputs extends KeyAdapter {
 		}
 	}
 	
-	private void moveLeft() {
-		if (!controlDown) {
+	private void moveLeft(KeyEvent e) {
+		if (!e.isControlDown()) {
 			//everything here is done by character
 			if (Main.activeWindow.selectedIndex > 0) {
 				//if there are more characters remaining behind the current index, just move down the string
@@ -339,8 +368,8 @@ public class Inputs extends KeyAdapter {
 		}
 	}
 	
-	private void moveUp() {
-		if (!controlDown) {
+	private void moveUp(KeyEvent e) {
+		if (!e.isControlDown()) {
 			if (Main.activeWindow.selectedText > 0) {
 				//if there is a line before the currently selected one
 				//adjust all variables so it moves to that line
@@ -365,8 +394,8 @@ public class Inputs extends KeyAdapter {
 		}
 	}
 	
-	private void moveDown() {
-		if (!controlDown) {
+	private void moveDown(KeyEvent e) {
+		if (!e.isControlDown()) {
 			if (Main.activeWindow.selectedText < Main.activeWindow.content.size() - 1) {
 				//if there is a line after the currently selected one
 				//adjust all variables so it moves to that line
