@@ -7,4 +7,8 @@ public class Settings {
 	
 	//Font Data (Dynamic font sizes will come later)
 	public static String fontPath = "res/SpaceMono-Regular.ttf";
+	
+	//Text Data (the lerp values are prolly the lowest it can be, don't fuck around with this)
+	public static float textXLerpSpeed = 0.5f;
+	public static float textYLerpSpeed = 0.5f;
 }

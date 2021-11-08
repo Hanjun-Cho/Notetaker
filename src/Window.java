@@ -26,7 +26,6 @@ public class Window {
 	public int highlightSelectedIndex = 0;
 	
 	public int cursorYIndex;
-	private int targetTextOffsetX;
 	public int selectedLeftIndex = 0;
 	public int selectedTopText = 0;
 	public int startCursorPosition = 0;
@@ -48,9 +47,10 @@ public class Window {
 		startCursorPosition = windowXOffset + sideBarWidth;
 		cursorYIndex = selectedText - selectedTopText;
 		
-		targetTextOffsetX = Math.max(0, selectedLeftIndex) * 11;
-		textOffsetX = (int)Maths.Lerp(textOffsetX, targetTextOffsetX, 0.5f);
-		textOffsetY = selectedTopText * Main.LINE_HEIGHT;
+		int targetTextOffsetX = Math.max(0, selectedLeftIndex) * 11;
+		int targetTextOffsetY = selectedTopText * Main.LINE_HEIGHT;
+		textOffsetX = (int)Maths.Lerp(textOffsetX, targetTextOffsetX, Settings.textXLerpSpeed);
+		textOffsetY = (int)Maths.Lerp(textOffsetY, targetTextOffsetY, Settings.textYLerpSpeed);
 	}
 	
 	public void paintBackground(Graphics g) {
