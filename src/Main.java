@@ -23,6 +23,7 @@ public class Main extends JPanel implements EventListener {
 	public static int FONT_WIDTH = 11;
 	public static int LINE_HEIGHT = 20;
 	public static int MAX_CHARACTERS_PER_LINE;
+	public static int MAX_LINES;
 	public static int SCREEN_RESOLUTION_WIDTH = 0;
 	public static int SCREEN_RESOLUTION_HEIGHT = 0;
 	public static int TARGET_FPS = 144;
@@ -34,7 +35,8 @@ public class Main extends JPanel implements EventListener {
 	private boolean isRunning = false;
 	private JFrame frame;
 	private Fonts font = new Fonts(Settings.fontPath, 18f);
-	public static Cursor cursor = new Cursor();
+	public static Cursor cursor = new Cursor(false);
+	public static Cursor tempCursor = new Cursor(true);
 	
 	public Main() {
 		new Settings();
@@ -65,9 +67,11 @@ public class Main extends JPanel implements EventListener {
 		SCREEN_WIDTH = frame.getWidth();
 		SCREEN_HEIGHT = frame.getHeight();
 		MAX_CHARACTERS_PER_LINE = (((SCREEN_WIDTH/2)-leftWindow.sideBarWidth - leftWindow.windowXOffset)/FONT_WIDTH) - 1;
+		MAX_LINES = SCREEN_HEIGHT/LINE_HEIGHT-2;
 		
 		leftWindow.update();
 		rightWindow.update();
+		tempCursor.update();
 		cursor.update();
 	}
 	
@@ -90,6 +94,7 @@ public class Main extends JPanel implements EventListener {
 			leftWindow.paint(g2D);
 		}
 		
+		tempCursor.paint(g2D);
 		cursor.paint(g2D);
 	}
 	

@@ -56,6 +56,11 @@ public class Inputs extends KeyAdapter {
 			deleteLine();
 			shortcut = true;
 		}
+		if(controlDown && shiftDown && e.getKeyCode() == KeyEvent.VK_SPACE) {
+			Main.activeWindow.highlightSelectedIndex = Main.activeWindow.selectedIndex;
+			Main.activeWindow.highlightSelectedText = Main.activeWindow.selectedText;
+			shortcut = true;
+		}
 	}
 
 	private void deleteLine() {
@@ -342,6 +347,10 @@ public class Inputs extends KeyAdapter {
 				Main.activeWindow.selectedText--;
 				Main.activeWindow.selectedIndex = Math.min(Main.activeWindow.selectedIndex, Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length());
 				Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
+				
+				if(Main.activeWindow.selectedText < Main.activeWindow.selectedTopText) {
+					Main.activeWindow.selectedTopText--;
+				}
 			}
 		} else {
 			//looks for the next gap between paragraphs
@@ -349,6 +358,10 @@ public class Inputs extends KeyAdapter {
 			int nextUp = nextSpace("up");
 			Main.activeWindow.selectedText = nextUp;
 			Main.activeWindow.selectedLeftIndex = 0;
+			
+			if(nextUp < Main.activeWindow.selectedTopText) {
+				Main.activeWindow.selectedTopText = Math.max(0,  Main.activeWindow.selectedText - Main.MAX_LINES - 1);
+			}
 		}
 	}
 	
@@ -360,6 +373,10 @@ public class Inputs extends KeyAdapter {
 				Main.activeWindow.selectedText++;
 				Main.activeWindow.selectedIndex = Math.min(Main.activeWindow.selectedIndex, Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length());
 				Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
+				
+				if(Main.activeWindow.selectedText >= Main.activeWindow.selectedTopText + Main.MAX_LINES - 1) {
+					Main.activeWindow.selectedTopText++;
+				}
 			}
 		} else {
 			//looks for the next gap between paragraphs
@@ -367,6 +384,10 @@ public class Inputs extends KeyAdapter {
 			int nextDown = nextSpace("down");
 			Main.activeWindow.selectedText = nextDown;
 			Main.activeWindow.selectedLeftIndex = 0;
+			
+			if(nextDown > Main.activeWindow.selectedTopText + Main.MAX_LINES - 1) {
+				Main.activeWindow.selectedTopText = Main.activeWindow.content.size() - Main.MAX_LINES - 1;
+			}
 		}
 	}
 	
