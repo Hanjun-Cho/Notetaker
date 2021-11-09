@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 public class Window {
 	
+	public ProgramState state = ProgramState.Editor;
 	public ArrayList<Text> content = new ArrayList<Text>();
 	public boolean active = false;
 	public boolean leftWindow = false;
@@ -63,13 +64,13 @@ public class Window {
 			g.setColor(new Color(200, 200, 200, active ? 255 : 100));
 
 			if(!leftWindow) {
-				if(active) g.drawString(content.get(i).content, windowXOffset + sideBarWidth - textOffsetX, windowYOffset + (i * 20) - textOffsetY);
+				if(active) g.drawString(content.get(i).content, windowXOffset + sideBarWidth - textOffsetX, windowYOffset + (i * 20) - textOffsetY + Main.fileInfo.infoHeight);
 				if(!active) g.drawString(content.get(i).content.substring(Math.max(0, selectedLeftIndex - 1)), 
-						0 > selectedLeftIndex - 1 ? windowXOffset + sideBarWidth - textOffsetX : windowXOffset + sideBarWidth - Main.FONT_WIDTH, windowYOffset + (i * 20) - textOffsetY);
+						0 > selectedLeftIndex - 1 ? windowXOffset + sideBarWidth - textOffsetX : windowXOffset + sideBarWidth - Main.FONT_WIDTH, windowYOffset + (i * 20) - textOffsetY + Main.fileInfo.infoHeight);
 			}
 			else {
-				if(active) g.drawString(content.get(i).content, windowXOffset + sideBarWidth - textOffsetX, windowYOffset + (i * 20) - textOffsetY);
-				if(!active) g.drawString(content.get(i).content.substring(0, Math.min(content.get(i).content.length(), selectedLeftIndex + Main.MAX_CHARACTERS_PER_LINE + 1)), windowXOffset + sideBarWidth - textOffsetX, windowYOffset + (i * 20) - textOffsetY);
+				if(active) g.drawString(content.get(i).content, windowXOffset + sideBarWidth - textOffsetX, windowYOffset + (i * 20) - textOffsetY + Main.fileInfo.infoHeight);
+				if(!active) g.drawString(content.get(i).content.substring(0, Math.min(content.get(i).content.length(), selectedLeftIndex + Main.MAX_CHARACTERS_PER_LINE + 1)), windowXOffset + sideBarWidth - textOffsetX, windowYOffset + (i * 20) - textOffsetY + Main.fileInfo.infoHeight);
 			}
 		}
 	}
@@ -92,14 +93,17 @@ public class Window {
 			}
 			
 			g.setColor(new Color(155, 155, 155, active ? 255 : 100));
-			g.drawString(String.valueOf(j + 1), Xoffset, windowYOffset + (i * 20));
+			g.drawString(String.valueOf(j + 1), Xoffset, windowYOffset + (i * 20) + Main.fileInfo.infoHeight);
 		}
 	}
 	
 	public void paint(Graphics g) {
 		paintBackground(g);
-		paintContent(g);
-		paintSideBarBackground(g);
-		paintSideBarText(g);
+		
+		if(state == ProgramState.Editor) {			
+			paintContent(g);
+			paintSideBarBackground(g);
+			paintSideBarText(g);
+		}
 	}
 }

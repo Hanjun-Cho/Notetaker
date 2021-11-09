@@ -7,6 +7,7 @@ import java.io.IOException;
 public class Fonts {
 	
 	public Font font;
+	private float size;
 	
 	public Fonts(String path, float size) {
 		try {
@@ -15,7 +16,12 @@ public class Fonts {
 			e.printStackTrace();
 		}
 		
+		this.size = size;
 		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		ge.registerFont(font);
+	}
+	
+	public int getFontPixelWidth() {
+		return (int)(size*0.65f);
 	}
 }

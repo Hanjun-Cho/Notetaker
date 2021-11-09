@@ -26,27 +26,26 @@ public class Inputs extends KeyAdapter {
 	
 	private void shortcuts(KeyEvent e) {
 		for(int i = 0; i < Settings.commands.length; i++) {
-			ArrayList<String> shortcut = new ArrayList<String>();
+			ArrayList<String> shortcut = new ArrayList<String>();			
+			boolean hasAll = true;
 			
 			for(int j = 0; j < Settings.shortcuts[i].size(); j++) {
 				shortcut.add(Settings.shortcuts[i].get(j));
 			}
 			
 			if((shortcut.contains("CTRL") && !e.isControlDown()) || (!shortcut.contains("CTRL") && e.isControlDown())) {
-				i++;
+				hasAll = false;
 			}
 			else {
 				if(shortcut.contains("CTRL")) shortcut.remove(shortcut.indexOf("CTRL"));
 			}
 			
 			if((shortcut.contains("SHIFT") && !e.isShiftDown()) || (!shortcut.contains("SHIFT") && e.isShiftDown())) {
-				i++;
+				hasAll = false;
 			}
 			else {
 				if(shortcut.contains("SHIFT")) shortcut.remove(shortcut.indexOf("SHIFT"));
 			}
-			
-			boolean hasAll = true;
 			
 			for(int j = 0; j < shortcut.size(); j++) {
 				if(Settings.convert.contains(shortcut.get(j))) {
@@ -90,6 +89,24 @@ public class Inputs extends KeyAdapter {
 			shortcut = true;
 			return;
 		}
+		
+		if(command.equals("createNewFile")) {
+			Main.activeWindow.state = ProgramState.NewFile;
+			shortcut = true;
+			return;
+		}
+		
+		if(command.equals("returnToEditor")) {
+			returnToEditor();
+			shortcut = true;
+			return;
+		}
+	}
+	
+	private void returnToEditor() {
+		Main.activeWindow.state = ProgramState.Editor;
+		Main.fileInfo.newFileString = "";
+		Main.fileInfo.selectedIndex = 0;
 	}
 
 	private void deleteLine() {
@@ -113,29 +130,42 @@ public class Inputs extends KeyAdapter {
 	}
 
 	private void type(KeyEvent e) {
-		if (typable(e)) {
-			//next 3 lines are straight-forward, you basically just add in the character entered right between the text before the index and right after the index
-			String content = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(0, Main.activeWindow.selectedIndex);
-			Main.activeWindow.content.get(Main.activeWindow.selectedText).content = content + e.getKeyChar() + Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(Main.activeWindow.selectedIndex);
-			Main.activeWindow.selectedIndex++;
-
-			//once the index is over the end of line, just increment the left index so the line inspector moves as well
-			// that 2nd line after this line is what stops the text from acting stupid and not move the inspector when you delete something from the selected line
-			if ((Main.activeWindow.selectedIndex > Main.MAX_CHARACTERS_PER_LINE - 1)) Main.activeWindow.selectedLeftIndex++;
-			if (((Main.activeWindow.selectedIndex < Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length())) && Main.activeWindow.cursorIndex < Main.MAX_CHARACTERS_PER_LINE - 1) Main.activeWindow.selectedLeftIndex--;
-		} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-			createNewLine();
-		} 
-		else if(e.getKeyCode() == KeyEvent.VK_TAB) {
-			//next 3 lines are straight-forward, you basically just add in the TAB characters entered right between the text
-			String content = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(0, Main.activeWindow.selectedIndex);
-			Main.activeWindow.content.get(Main.activeWindow.selectedText).content = content + TAB + Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(Main.activeWindow.selectedIndex);
-			Main.activeWindow.selectedIndex += TAB.length();
-			
-			//no idea why this work but it does so I'll keep it
-			if ((Main.activeWindow.selectedIndex > Main.MAX_CHARACTERS_PER_LINE - 1)) Main.activeWindow.selectedLeftIndex += Math.max(0, Main.activeWindow.selectedIndex - (Main.MAX_CHARACTERS_PER_LINE - 1));
-			if (((Main.activeWindow.selectedIndex < Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length())) && Main.activeWindow.cursorIndex < Main.MAX_CHARACTERS_PER_LINE - 1) Main.activeWindow.selectedLeftIndex -= Math.max(0, Main.activeWindow.selectedIndex - (Main.MAX_CHARACTERS_PER_LINE - 1));
-			
+		if(Main.activeWindow.state == ProgramState.Editor) {			
+			if (typable(e)) {
+				//next 3 lines are straight-forward, you basically just add in the character entered right between the text before the index and right after the index
+				String content = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(0, Main.activeWindow.selectedIndex);
+				Main.activeWindow.content.get(Main.activeWindow.selectedText).content = content + e.getKeyChar() + Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(Main.activeWindow.selectedIndex);
+				Main.activeWindow.selectedIndex++;
+				
+				//once the index is over the end of line, just increment the left index so the line inspector moves as well
+				// that 2nd line after this line is what stops the text from acting stupid and not move the inspector when you delete something from the selected line
+				if ((Main.activeWindow.selectedIndex > Main.MAX_CHARACTERS_PER_LINE - 1)) Main.activeWindow.selectedLeftIndex++;
+				if (((Main.activeWindow.selectedIndex < Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length())) && Main.activeWindow.cursorIndex < Main.MAX_CHARACTERS_PER_LINE - 1) Main.activeWindow.selectedLeftIndex--;
+			} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+				createNewLine();
+			} 
+			else if(e.getKeyCode() == KeyEvent.VK_TAB) {
+				//next 3 lines are straight-forward, you basically just add in the TAB characters entered right between the text
+				String content = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(0, Main.activeWindow.selectedIndex);
+				Main.activeWindow.content.get(Main.activeWindow.selectedText).content = content + TAB + Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(Main.activeWindow.selectedIndex);
+				Main.activeWindow.selectedIndex += TAB.length();
+				
+				//no idea why this work but it does so I'll keep it
+				if ((Main.activeWindow.selectedIndex > Main.MAX_CHARACTERS_PER_LINE - 1)) Main.activeWindow.selectedLeftIndex += Math.max(0, Main.activeWindow.selectedIndex - (Main.MAX_CHARACTERS_PER_LINE - 1));
+				if (((Main.activeWindow.selectedIndex < Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length())) && Main.activeWindow.cursorIndex < Main.MAX_CHARACTERS_PER_LINE - 1) Main.activeWindow.selectedLeftIndex -= Math.max(0, Main.activeWindow.selectedIndex - (Main.MAX_CHARACTERS_PER_LINE - 1));
+				
+			}
+		}
+		else if(Main.activeWindow.state == ProgramState.NewFile) {
+			if(typable(e) && Main.fileInfo.newFileString.length() < 50) {
+				String content = Main.fileInfo.newFileString.substring(0, Main.fileInfo.selectedIndex);
+				Main.fileInfo.newFileString = content + e.getKeyChar() + Main.fileInfo.newFileString.substring(Main.fileInfo.selectedIndex);
+				Main.fileInfo.selectedIndex++;
+			}
+			else if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+				System.out.println("created file -> " + Main.fileInfo.newFileString);
+				returnToEditor();
+			}
 		}
 	}
 	
@@ -156,9 +186,9 @@ public class Inputs extends KeyAdapter {
 			moveRight(e);
 		} else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
 			moveLeft(e);
-		} else if (e.getKeyCode() == KeyEvent.VK_UP) {
+		} else if (e.getKeyCode() == KeyEvent.VK_UP && Main.activeWindow.state == ProgramState.Editor) {
 			moveUp(e);
-		} else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+		} else if (e.getKeyCode() == KeyEvent.VK_DOWN && Main.activeWindow.state == ProgramState.Editor) {
 			moveDown(e);
 		}
 	}
@@ -175,45 +205,75 @@ public class Inputs extends KeyAdapter {
 
 	private int nextSpace(String direction) {
 		if (direction.equals("right")) {
-			if (Main.activeWindow.selectedIndex < Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length()) {
-				int i = Main.activeWindow.selectedIndex + 1;
+			if(Main.activeWindow.state == ProgramState.Editor) {				
+				if (Main.activeWindow.selectedIndex < Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length()) {
+					int i = Main.activeWindow.selectedIndex + 1;
+					
+					for(; i < Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length() - 1; i++) {
+						if(Main.activeWindow.content.get(Main.activeWindow.selectedText).content.charAt(i) == ' ' && 
+								Main.activeWindow.content.get(Main.activeWindow.selectedText).content.charAt(i - 1) != ' ') {
+							return i;
+						}
+					}
+					
+					return Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length();
+				} else {
+					if (Main.activeWindow.selectedText < Main.activeWindow.content.size() - 1) {
+						Main.activeWindow.selectedText++;
+						return 0;
+					} else {
+						return Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length();
+					}
+				}
+			}
+			else if(Main.activeWindow.state == ProgramState.NewFile) {
+				int i = Main.fileInfo.selectedIndex + 1;
 				
-				for(; i < Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length() - 1; i++) {
-					if(Main.activeWindow.content.get(Main.activeWindow.selectedText).content.charAt(i) == ' ' && 
-							Main.activeWindow.content.get(Main.activeWindow.selectedText).content.charAt(i - 1) != ' ') {
+				for(; i < Main.fileInfo.newFileString.length() - 1; i++) {
+					if((Main.fileInfo.newFileString.charAt(i) == ' ' && 
+							Main.fileInfo.newFileString.charAt(i - 1) != ' ') || 
+							Character.isUpperCase(Main.fileInfo.newFileString.charAt(i))) {
 						return i;
 					}
 				}
 				
-				return Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length();
-			} else {
-				if (Main.activeWindow.selectedText < Main.activeWindow.content.size() - 1) {
-					Main.activeWindow.selectedText++;
-					return 0;
-				} else {
-					return Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length();
-				}
+				return Main.fileInfo.newFileString.length();
 			}
 		} else if (direction.equals("left") || direction.equals("leftdel")) {
-			if (Main.activeWindow.selectedIndex != 0) {
-				int i = Math.max(Main.activeWindow.selectedIndex - 1, 0);
+			if(Main.activeWindow.state == ProgramState.Editor) {				
+				if (Main.activeWindow.selectedIndex != 0) {
+					int i = Math.max(Main.activeWindow.selectedIndex - 1, 0);
+					
+					for(; i > 0; i--) {
+						if(Main.activeWindow.content.get(Main.activeWindow.selectedText).content.charAt(i) == ' ' && 
+								Main.activeWindow.content.get(Main.activeWindow.selectedText).content.charAt(i - 1) != ' ') {
+							return i;
+						}
+					}
+					
+					return 0;
+				} else {
+					if (Main.activeWindow.selectedText > 0 && !direction.equals("leftdel")) {
+						Main.activeWindow.selectedText--;
+						Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length() - Main.MAX_CHARACTERS_PER_LINE + 1);
+						return Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length();
+					} else {
+						return 0;
+					}
+				}
+			}
+			else if(Main.activeWindow.state == ProgramState.NewFile) {
+				int i = Math.max(Main.fileInfo.selectedIndex - 1, 0);
 				
 				for(; i > 0; i--) {
-					if(Main.activeWindow.content.get(Main.activeWindow.selectedText).content.charAt(i) == ' ' && 
-							Main.activeWindow.content.get(Main.activeWindow.selectedText).content.charAt(i - 1) != ' ') {
+					if((Main.fileInfo.newFileString.charAt(i) == ' ' && 
+							Main.fileInfo.newFileString.charAt(i - 1) != ' ') || 
+							Character.isUpperCase(Main.fileInfo.newFileString.charAt(i))) {
 						return i;
 					}
 				}
 				
 				return 0;
-			} else {
-				if (Main.activeWindow.selectedText > 0 && !direction.equals("leftdel")) {
-					Main.activeWindow.selectedText--;
-					Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length() - Main.MAX_CHARACTERS_PER_LINE + 1);
-					return Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length();
-				} else {
-					return 0;
-				}
 			}
 		} else if (direction.equals("up")) {
 			for (int i = Math.max(Main.activeWindow.selectedText - 1, 0); i >= 0; i--) {
@@ -244,127 +304,168 @@ public class Inputs extends KeyAdapter {
 	}
 	
 	private void deleteCharacter() {
-		if (Main.activeWindow.selectedIndex > 0) {
-			//if there is stuff to delete, just delete that character and adjust the variables
-			String content = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(Main.activeWindow.selectedIndex);
-			Main.activeWindow.content.get(Main.activeWindow.selectedText).content = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(0, Main.activeWindow.selectedIndex - 1) + content;
-			Main.activeWindow.selectedIndex--;
-			if(Main.activeWindow.selectedLeftIndex > 0) Main.activeWindow.selectedLeftIndex--;		
-		} else {
-			if (Main.activeWindow.selectedText > 0) {
-				//if there isn't anything to delete, remove the current line and move onto the previous line and just stay at the end of line
-				Main.activeWindow.content.remove(Main.activeWindow.selectedText);
-				Main.activeWindow.selectedText--;
-				Main.activeWindow.selectedIndex = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length();
-				Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length() - Main.MAX_CHARACTERS_PER_LINE + 1);
+		if(Main.activeWindow.state == ProgramState.Editor) {			
+			if (Main.activeWindow.selectedIndex > 0) {
+				//if there is stuff to delete, just delete that character and adjust the variables
+				String content = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(Main.activeWindow.selectedIndex);
+				Main.activeWindow.content.get(Main.activeWindow.selectedText).content = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(0, Main.activeWindow.selectedIndex - 1) + content;
+				Main.activeWindow.selectedIndex--;
+				if(Main.activeWindow.selectedLeftIndex > 0) Main.activeWindow.selectedLeftIndex--;		
+			} else {
+				if (Main.activeWindow.selectedText > 0) {
+					//if there isn't anything to delete, remove the current line and move onto the previous line and just stay at the end of line
+					Main.activeWindow.content.remove(Main.activeWindow.selectedText);
+					Main.activeWindow.selectedText--;
+					Main.activeWindow.selectedIndex = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length();
+					Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length() - Main.MAX_CHARACTERS_PER_LINE + 1);
+				}
+			}
+		}
+		else if(Main.activeWindow.state == ProgramState.NewFile) {
+			if(Main.fileInfo.selectedIndex > 0) {
+				Main.fileInfo.newFileString = Main.fileInfo.newFileString.substring(0, Main.fileInfo.selectedIndex - 1) + Main.fileInfo.newFileString.substring(Main.fileInfo.selectedIndex);
+				Main.fileInfo.selectedIndex--;
 			}
 		}
 	}
 	
 	private void deleteWord() {
-		//nextLeft first grabs what the next space on the left is
-		int nextLeft = nextSpace("leftdel");
-		int textIndex = Main.activeWindow.selectedText;
-
-		if (Main.activeWindow.selectedIndex == 0 && Main.activeWindow.selectedText > 0) {
-			//is this is the beginning of the line
-			//goes through all lines previous for the next line with text on it
-			int i = Main.activeWindow.selectedText - 1;
+		if(Main.activeWindow.state == ProgramState.Editor) {			
+			//nextLeft first grabs what the next space on the left is
+			int nextLeft = nextSpace("leftdel");
+			int textIndex = Main.activeWindow.selectedText;
 			
-			for(; i >= 0; i--) {
-				if(Main.activeWindow.content.get(i).content.length() != 0) {
-					break;
-				}
-			}
-			
-			//when found, grabs the next left index and removes the last word of that line
-			//pastes all the words from the original line onto the end because that shouldn't just poof out of existence
-			//and removes all lines between the lines so it doesn't look weird
-			Main.activeWindow.selectedText = i;
-			Main.activeWindow.selectedIndex = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length();
-			nextLeft = nextSpace("left");
-			Main.activeWindow.content.get(Main.activeWindow.selectedText).content = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(0, nextLeft) + Main.activeWindow.content.get(textIndex).content.substring(0);
-			Main.activeWindow.selectedIndex = nextLeft;
-			
-			if(i + 1 != textIndex) {						
-				for(int j = i + 1; j < textIndex; j++) {
-					if(j < Main.activeWindow.content.size()) {
-						Main.activeWindow.content.remove(j);
-						j--;							
+			if (Main.activeWindow.selectedIndex == 0 && Main.activeWindow.selectedText > 0) {
+				//is this is the beginning of the line
+				//goes through all lines previous for the next line with text on it
+				int i = Main.activeWindow.selectedText - 1;
+				
+				for(; i >= 0; i--) {
+					if(Main.activeWindow.content.get(i).content.length() != 0) {
+						break;
 					}
 				}
-			}
-			else {
-				Main.activeWindow.content.remove(textIndex);
-			}
-
-			Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length() - Main.MAX_CHARACTERS_PER_LINE + 1);
-		} else {
-			if (Main.activeWindow.selectedIndex > 0) {
-				//if are words remaining behind, it just removes it and changes the index
-				Main.activeWindow.content.get(Main.activeWindow.selectedText).content = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(0, nextLeft) + 
-						Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(Main.activeWindow.selectedIndex);
+				
+				//when found, grabs the next left index and removes the last word of that line
+				//pastes all the words from the original line onto the end because that shouldn't just poof out of existence
+				//and removes all lines between the lines so it doesn't look weird
+				Main.activeWindow.selectedText = i;
+				Main.activeWindow.selectedIndex = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length();
+				nextLeft = nextSpace("left");
+				Main.activeWindow.content.get(Main.activeWindow.selectedText).content = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(0, nextLeft) + Main.activeWindow.content.get(textIndex).content.substring(0);
 				Main.activeWindow.selectedIndex = nextLeft;
-				if (Main.activeWindow.selectedIndex < Main.activeWindow.selectedLeftIndex) Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
+				
+				if(i + 1 != textIndex) {						
+					for(int j = i + 1; j < textIndex; j++) {
+						if(j < Main.activeWindow.content.size()) {
+							Main.activeWindow.content.remove(j);
+							j--;							
+						}
+					}
+				}
+				else {
+					Main.activeWindow.content.remove(textIndex);
+				}
+				
+				Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length() - Main.MAX_CHARACTERS_PER_LINE + 1);
 			} else {
-				//if no more words left, just makes content into nothing
-				Main.activeWindow.content.get(Main.activeWindow.selectedText).content = "";
-				Main.activeWindow.selectedIndex = 0;
-				Main.activeWindow.selectedLeftIndex = 0;
+				if (Main.activeWindow.selectedIndex > 0) {
+					//if are words remaining behind, it just removes it and changes the index
+					Main.activeWindow.content.get(Main.activeWindow.selectedText).content = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(0, nextLeft) + 
+							Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(Main.activeWindow.selectedIndex);
+					Main.activeWindow.selectedIndex = nextLeft;
+					if (Main.activeWindow.selectedIndex < Main.activeWindow.selectedLeftIndex) Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
+				} else {
+					//if no more words left, just makes content into nothing
+					Main.activeWindow.content.get(Main.activeWindow.selectedText).content = "";
+					Main.activeWindow.selectedIndex = 0;
+					Main.activeWindow.selectedLeftIndex = 0;
+				}
 			}
+		}
+		else if(Main.activeWindow.state == ProgramState.NewFile) {
+			int nextLeft = nextSpace("left");
+			Main.fileInfo.newFileString = Main.fileInfo.newFileString.substring(0, nextLeft) + Main.fileInfo.newFileString.substring(Main.fileInfo.selectedIndex);
+			Main.fileInfo.selectedIndex = nextLeft;
 		}
 	}
 	
 	private void moveRight(KeyEvent e) {
-		if (!e.isControlDown()) {
-			//everything here is done by character
-			if (Main.activeWindow.selectedIndex < Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length()) {
-				//if the current index is less than the length of the whole line, it just increments the index so that it moves along
-				Main.activeWindow.selectedIndex++;
-				if (Main.activeWindow.selectedIndex > Main.activeWindow.selectedLeftIndex + Main.MAX_CHARACTERS_PER_LINE - 1) Main.activeWindow.selectedLeftIndex++;
+		if(Main.activeWindow.state == ProgramState.Editor) {			
+			if (!e.isControlDown()) {
+				//everything here is done by character
+				if (Main.activeWindow.selectedIndex < Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length()) {
+					//if the current index is less than the length of the whole line, it just increments the index so that it moves along
+					Main.activeWindow.selectedIndex++;
+					if (Main.activeWindow.selectedIndex > Main.activeWindow.selectedLeftIndex + Main.MAX_CHARACTERS_PER_LINE - 1) Main.activeWindow.selectedLeftIndex++;
+				} else {
+					//if the current index is at the end of the line, it'll check if there is another line afterwards
+					//if there is a line, it'll adjust all values to fit the increment
+					if (Main.activeWindow.selectedText < Main.activeWindow.content.size() - 1) {
+						Main.activeWindow.selectedIndex = 0;
+						Main.activeWindow.selectedText++;
+						Main.activeWindow.selectedLeftIndex = 0;
+					}
+				}
 			} else {
-				//if the current index is at the end of the line, it'll check if there is another line afterwards
-				//if there is a line, it'll adjust all values to fit the increment
-				if (Main.activeWindow.selectedText < Main.activeWindow.content.size() - 1) {
-					Main.activeWindow.selectedIndex = 0;
-					Main.activeWindow.selectedText++;
-					Main.activeWindow.selectedLeftIndex = 0;
+				//everything here is done by word
+				//nextRight will tell us where the next space is to teleport to
+				//indexes are adjusted
+				int nextRight = nextSpace("right");
+				Main.activeWindow.selectedIndex = nextRight;
+				Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
+			}
+		}
+		else if(Main.activeWindow.state == ProgramState.NewFile) {
+			if(!e.isControlDown()) {				
+				if(Main.fileInfo.selectedIndex < Main.fileInfo.newFileString.length()) {
+					Main.fileInfo.selectedIndex++;
 				}
 			}
-		} else {
-			//everything here is done by word
-			//nextRight will tell us where the next space is to teleport to
-			//indexes are adjusted
-			int nextRight = nextSpace("right");
-			Main.activeWindow.selectedIndex = nextRight;
-			Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
+			else {
+				int nextRight = nextSpace("right");
+				Main.fileInfo.selectedIndex = nextRight;
+			}
 		}
 	}
 	
 	private void moveLeft(KeyEvent e) {
-		if (!e.isControlDown()) {
-			//everything here is done by character
-			if (Main.activeWindow.selectedIndex > 0) {
-				//if there are more characters remaining behind the current index, just move down the string
-				//adjust all necessary values as well
-				Main.activeWindow.selectedIndex--;
-				if (Main.activeWindow.selectedIndex < Main.activeWindow.selectedLeftIndex) Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
+		if(Main.activeWindow.state == ProgramState.Editor) {			
+			if (!e.isControlDown()) {
+				//everything here is done by character
+				if (Main.activeWindow.selectedIndex > 0) {
+					//if there are more characters remaining behind the current index, just move down the string
+					//adjust all necessary values as well
+					Main.activeWindow.selectedIndex--;
+					if (Main.activeWindow.selectedIndex < Main.activeWindow.selectedLeftIndex) Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
+				} else {
+					//if the index is at the beginning of the line, it will look for a line before the current one
+					//if such line exists, it will move to the end of the previous line and adjust all variables as necessary
+					if (Main.activeWindow.selectedText > 0) {
+						Main.activeWindow.selectedText--;
+						Main.activeWindow.selectedIndex = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length();
+						Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
+					}
+				}
 			} else {
-				//if the index is at the beginning of the line, it will look for a line before the current one
-				//if such line exists, it will move to the end of the previous line and adjust all variables as necessary
-				if (Main.activeWindow.selectedText > 0) {
-					Main.activeWindow.selectedText--;
-					Main.activeWindow.selectedIndex = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length();
-					Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
+				//everything here is done by word
+				//nextRight will tell us where the next space is to teleport to
+				//indexes are adjusted
+				int nextLeft = nextSpace("left");
+				Main.activeWindow.selectedIndex = nextLeft;
+				if (Main.activeWindow.selectedIndex < Main.activeWindow.selectedLeftIndex) Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
+			}
+		}
+		else if(Main.activeWindow.state == ProgramState.NewFile) {
+			if(!e.isControlDown()) {				
+				if(Main.fileInfo.selectedIndex > 0) {
+					Main.fileInfo.selectedIndex--;
 				}
 			}
-		} else {
-			//everything here is done by word
-			//nextRight will tell us where the next space is to teleport to
-			//indexes are adjusted
-			int nextLeft = nextSpace("left");
-			Main.activeWindow.selectedIndex = nextLeft;
-			if (Main.activeWindow.selectedIndex < Main.activeWindow.selectedLeftIndex) Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
+			else {
+				int nextLeft = nextSpace("left");
+				Main.fileInfo.selectedIndex = nextLeft;
+			}
 		}
 	}
 	

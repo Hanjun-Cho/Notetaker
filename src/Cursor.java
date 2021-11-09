@@ -45,25 +45,33 @@ public class Cursor {
 	
 	private void moveCursor() {
 		if(!tempCursor) {
-			//movePos -> position of cursor if the cursor is moving
-			//endPos -> position of cursor if the cursor is stationary at the end of the line
-			int movePos = Main.activeWindow.startCursorPosition + (Main.FONT_WIDTH * Main.activeWindow.cursorIndex) + 2;
-			int endPos = Main.activeWindow.startCursorPosition + ((Main.MAX_CHARACTERS_PER_LINE - 1) * Main.FONT_WIDTH) + 2;
-			
-			//for targetX, there is a 2 pixel offset at index 0 and is completely fine everywhere else, so the first part is necessary, dont remove...
-			int targetX = Main.activeWindow.selectedIndex == 0 ? Main.activeWindow.startCursorPosition : Math.min(movePos, endPos);
-			int targetY = Math.max(Main.activeWindow.cursorYOffset, Math.min(Main.activeWindow.cursorYOffset + (Main.LINE_HEIGHT * Main.activeWindow.cursorYIndex), Main.activeWindow.cursorYOffset + (Main.LINE_HEIGHT * (Main.MAX_LINES - 2))));
-			cursorX = (int)Maths.Lerp(cursorX, targetX, Settings.cursorXLerpSpeed);
-			cursorY = (int)Maths.Lerp(cursorY, targetY, Settings.cursorYLerpSpeed);			
+			if(Main.activeWindow.state == ProgramState.Editor) {				
+				//movePos -> position of cursor if the cursor is moving
+				//endPos -> position of cursor if the cursor is stationary at the end of the line
+				int movePos = Main.activeWindow.startCursorPosition + (Main.FONT_WIDTH * Main.activeWindow.cursorIndex) + 2;
+				int endPos = Main.activeWindow.startCursorPosition + ((Main.MAX_CHARACTERS_PER_LINE - 1) * Main.FONT_WIDTH) + 2;
+				
+				//for targetX, there is a 2 pixel offset at index 0 and is completely fine everywhere else, so the first part is necessary, dont remove...
+				int targetX = Main.activeWindow.selectedIndex == 0 ? Main.activeWindow.startCursorPosition : Math.min(movePos, endPos);
+				int targetY = Math.max(Main.activeWindow.cursorYOffset + Main.fileInfo.infoHeight, Math.min(Main.activeWindow.cursorYOffset + (Main.LINE_HEIGHT * Main.activeWindow.cursorYIndex) + Main.fileInfo.infoHeight, Main.activeWindow.cursorYOffset + (Main.LINE_HEIGHT * (Main.MAX_LINES - 2) + Main.fileInfo.infoHeight)));
+				cursorX = (int)Maths.Lerp(cursorX, targetX, Settings.cursorXLerpSpeed);
+				cursorY = (int)Maths.Lerp(cursorY, targetY, Settings.cursorYLerpSpeed);			
+			}
+			else if(Main.activeWindow.state == ProgramState.NewFile) {
+				//for targetX, there is a 2 pixel offset at index 0 and is completely fine everywhere else, so the first part is necessary, dont remove...
+				int targetX = 100 + (Main.FONT_WIDTH * Main.fileInfo.selectedIndex) + 6;
+				cursorX = (int)Maths.Lerp(cursorX, targetX, Settings.cursorXLerpSpeed);
+				cursorY = (int)Maths.Lerp(cursorY, 7, Settings.cursorYLerpSpeed);
+			}
 		}
 		else {
 			//movePos -> position of cursor if the cursor is moving
 			//endPos -> position of cursor if the cursor is stationary at the end of the line
-			int movePos = Main.activeWindow.startCursorPosition + (Main.FONT_WIDTH * Main.activeWindow.highlightSelectedIndex) + 2;
+			int movePos = Main.activeWindow.startCursorPosition + (Main.FONT_WIDTH * Main.activeWindow.highlightSelectedIndex);
 			int endPos = Main.activeWindow.startCursorPosition + ((Main.MAX_CHARACTERS_PER_LINE - 1) * Main.FONT_WIDTH) + 2;
 			
 			cursorX = Main.activeWindow.highlightSelectedIndex == 0 ? Main.activeWindow.startCursorPosition : Math.min(movePos, endPos);
-			cursorY = Main.activeWindow.cursorYOffset + (Main.LINE_HEIGHT * Main.activeWindow.highlightSelectedText);
+			cursorY = Main.activeWindow.cursorYOffset + (Main.LINE_HEIGHT * Main.activeWindow.highlightSelectedText) - 2 + Main.fileInfo.infoHeight;
 		}
 	}
 	

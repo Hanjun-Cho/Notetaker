@@ -10,7 +10,8 @@ public class Settings {
 	public static float cursorYLerpSpeed = 0.5f; //same for this value
 	
 	//Font Data (Dynamic font sizes will come later)
-	public static String fontPath = "res/SpaceMono-Regular.ttf";
+	public static String editorFontPath = "res/SpaceMono-Regular.ttf";
+	public static String fileInfoFontPath = "res/SpaceMono-Regular.ttf";
 	
 	//Text Data (the lerp values are prolly the lowest it can be, don't fuck around with this)
 	public static float textXLerpSpeed = 0.5f;
@@ -21,7 +22,9 @@ public class Settings {
 		"switchToRightWindow",
 		"switchToLeftWindow",
 		"deleteLine",
-		"changeHighlightStartPosition"
+		"changeHighlightStartPosition",
+		"createNewFile",
+		"returnToEditor"
 	};
 	
 	public static ArrayList<String> convert = new ArrayList<String>();
@@ -34,6 +37,8 @@ public class Settings {
 		addShortcut(1, "CTRL-SHIFT-LEFT");
 		addShortcut(2, "CTRL-SHIFT-D");
 		addShortcut(3, "CTRL-SHIFT-SPACE");
+		addShortcut(4, "CTRL-N");
+		addShortcut(5, "ESCAPE");
 		setupConvert();
 	}
 	
@@ -68,6 +73,7 @@ public class Settings {
 		addConvert("RIGHT", KeyEvent.VK_RIGHT);
 		addConvert("LEFT", KeyEvent.VK_LEFT);
 		addConvert("SPACE", KeyEvent.VK_SPACE);
+		addConvert("ESCAPE", 27);
 	}
 	
 	private void addConvert(String command, int id) {

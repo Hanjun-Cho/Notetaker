@@ -16,7 +16,6 @@ import javax.swing.JPanel;
 
 public class Main extends JPanel implements EventListener {
 	
-	//(TODO) -> FIX THE RESIZE
 	private static final long serialVersionUID = 1L;
 	public static int SCREEN_WIDTH = 1920;
 	public static int SCREEN_HEIGHT = 1080;
@@ -32,11 +31,17 @@ public class Main extends JPanel implements EventListener {
 	private static Window rightWindow = new Window(false);
 	public static Window activeWindow = leftWindow;
 	
+	public static FileInfo fileInfo = new FileInfo();
+	
 	private boolean isRunning = false;
 	private JFrame frame;
-	private Fonts font = new Fonts(Settings.fontPath, 18f);
+	
+	private Fonts editorFont = new Fonts(Settings.editorFontPath, 18f);
+	private Fonts fileInfoFont = new Fonts(Settings.fileInfoFontPath, 16f);
+	
 	public static Cursor cursor = new Cursor(false);
 	public static Cursor tempCursor = new Cursor(true);
+	public static String newFileString = "";
 	
 	public Main() {
 		new Settings();
@@ -67,7 +72,14 @@ public class Main extends JPanel implements EventListener {
 		SCREEN_WIDTH = frame.getWidth();
 		SCREEN_HEIGHT = frame.getHeight();
 		MAX_CHARACTERS_PER_LINE = (((SCREEN_WIDTH/2)-leftWindow.sideBarWidth - leftWindow.windowXOffset)/FONT_WIDTH) - 1;
-		MAX_LINES = SCREEN_HEIGHT/LINE_HEIGHT-2;
+		MAX_LINES = (SCREEN_HEIGHT - fileInfo.infoHeight)/LINE_HEIGHT-2;
+		
+		if(Main.activeWindow.state == ProgramState.Editor) {
+			FONT_WIDTH = editorFont.getFontPixelWidth();
+		}
+		else {
+			FONT_WIDTH = fileInfoFont.getFontPixelWidth();
+		}
 		
 		leftWindow.update();
 		rightWindow.update();
@@ -83,7 +95,7 @@ public class Main extends JPanel implements EventListener {
 		g.setColor(new Color(0, 0, 0));
 		g.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 		
-		g.setFont(font.font);
+		g.setFont(editorFont.font);
 		
 		if(leftWindow == activeWindow) {
 			leftWindow.paint(g2D);
@@ -94,8 +106,10 @@ public class Main extends JPanel implements EventListener {
 			leftWindow.paint(g2D);
 		}
 		
-		tempCursor.paint(g2D);
-		cursor.paint(g2D);
+		g.setFont(fileInfoFont.font);
+		fileInfo.paint(g2D);
+		if(activeWindow.state == ProgramState.Editor) tempCursor.paint(g2D);
+		cursor.paint(g2D);		
 	}
 	
 	public synchronized void stop() {
@@ -139,7 +153,7 @@ public class Main extends JPanel implements EventListener {
 	
 	private void createWindow() {
 		frame = new JFrame("Notepad");
-		frame.setMinimumSize(new Dimension(1280, 720));
+		frame.setMinimumSize(new Dimension(800, 600));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		//frame.setUndecorated(true);
