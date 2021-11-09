@@ -28,8 +28,8 @@ public class Main extends JPanel implements EventListener {
 	public static int TARGET_FPS = 144;
 	public static int MAX_FILE_DISPLAY;
 	
-	private static Window leftWindow = new Window(true);
-	private static Window rightWindow = new Window(false);
+	public static Window leftWindow = new Window(true);
+	public static Window rightWindow = new Window(false);
 	public static Window activeWindow = leftWindow;
 	
 	public static FileInfo fileInfo = new FileInfo();
@@ -104,8 +104,14 @@ public class Main extends JPanel implements EventListener {
 			rightWindow.paint(g2D);
 		}
 		else {		
-			rightWindow.paint(g2D);
-			leftWindow.paint(g2D);
+			if(rightWindow.state == ProgramState.Editor) {				
+				rightWindow.paint(g2D);
+				leftWindow.paint(g2D);
+			}
+			else {
+				leftWindow.paint(g2D);
+				rightWindow.paint(g2D);
+			}
 		}
 		
 		g.setFont(fileInfoFont.font);

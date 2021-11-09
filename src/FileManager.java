@@ -64,6 +64,7 @@ public class FileManager {
 					}
 					
 					Main.activeWindow.needsSave = false;
+					Main.activeWindow.state = ProgramState.Editor;
 					writer.close();
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -93,11 +94,30 @@ public class FileManager {
 	
 	public static void loadFile(File file) {
 		boolean hadFile = Main.activeWindow.selectedFile != null;
+		
+		if(Main.leftWindow.active) {
+			if(Main.rightWindow.selectedFile != null && Main.rightWindow.selectedFile.getAbsolutePath().equals(file.getAbsolutePath())) {
+				Main.activeWindow = Main.rightWindow;
+				Main.activeWindow.active = true;
+				Main.leftWindow.active = false;
+				Main.leftWindow.state = ProgramState.Editor;
+				return;
+			}
+		}
+		else {
+			if(Main.leftWindow.selectedFile != null && Main.leftWindow.selectedFile.getAbsoluteFile().equals(file.getAbsoluteFile())) {
+				Main.activeWindow = Main.leftWindow;
+				Main.activeWindow.active = true;
+				Main.rightWindow.active = false;
+				Main.rightWindow.state = ProgramState.Editor;
+				return;
+			}
+		}
 		Main.activeWindow.selectedFile = file;
 		Main.activeWindow.needsSave = false;
 		
 		try {		
-			if(!hadFile) saveFile(true, file);
+			if(!hadFile && Main.activeWindow.state == ProgramState.NewFile) saveFile(true, file);
 			Scanner scanner = new Scanner(file);
 			Main.activeWindow.content.clear();
 			Main.activeWindow.content.add(new Text());
@@ -106,12 +126,17 @@ public class FileManager {
 			while(scanner.hasNextLine()) {
 				if(Main.activeWindow.content.size() <= i) Main.activeWindow.content.add(new Text());
 				String line = scanner.nextLine();
+				System.out.println(line);
 				Main.activeWindow.content.get(i).content = line;
+				i++;
 			}
 
 			Main.activeWindow.selectedIndex = 0;
 			Main.activeWindow.selectedText = 0;
 			Main.activeWindow.state = ProgramState.Editor;
+			Main.fileInfo.newFileString = "";
+			Main.fileInfo.openFileString = "";
+			Main.fileInfo.selectedIndex = 0;
 			scanner.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -119,8 +144,9 @@ public class FileManager {
 	}
 	
 	public static void loadFile(String path) {
-		if(Main.activeWindow.fileSelectIndex < Main.activeWindow.files.size()) {			
+		if(Main.activeWindow.fileSelectIndex < Main.activeWindow.files.size() && Main.activeWindow.fileSelectIndex >= 0) {			
 			String p = Main.activeWindow.files.get(Main.activeWindow.fileSelectIndex).getName();
+			System.out.println(path + p);
 			
 			for(int i = 0; i < Main.activeWindow.files.size(); i++) {
 				if(Main.activeWindow.files.get(i).getName().equals(p)) {
