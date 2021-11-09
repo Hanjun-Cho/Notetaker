@@ -29,7 +29,8 @@ public class Cursor {
 		moveCursor();
 		
 		if(tempCursor) {			
-			if(Main.activeWindow.selectedLeftIndex <= Main.activeWindow.highlightSelectedIndex) {
+			if(Main.activeWindow.selectedLeftIndex <= Main.activeWindow.highlightSelectedIndex &&
+					Main.activeWindow.highlightSelectedText < Main.activeWindow.content.size() && Main.activeWindow.highlightSelectedIndex <= Main.activeWindow.content.get(Main.activeWindow.highlightSelectedText).content.length()) {
 				if(Main.activeWindow.highlightSelectedText >= Main.activeWindow.selectedTopText) {
 					render = true;
 				}
