@@ -56,7 +56,7 @@ public class Window {
 		cursorIndex = selectedIndex - selectedLeftIndex;
 		startCursorPosition = windowXOffset + sideBarWidth;
 		cursorYIndex = selectedText - selectedTopText;
-		fileSelectIndex = Math.min(fileSelectIndex, files.size() - 1);
+		fileSelectIndex = Math.min(fileSelectIndex, files.size());
 		
 		int targetTextOffsetX = Math.max(0, selectedLeftIndex) * 11;
 		int targetTextOffsetY = selectedTopText * Main.LINE_HEIGHT;
@@ -76,7 +76,7 @@ public class Window {
 			if(i >= 0 && i < content.size()) {				
 				if(!leftWindow) {
 					if(active) g.drawString(content.get(i).content, windowXOffset + sideBarWidth - textOffsetX, windowYOffset + (i * 20) - textOffsetY + Main.fileInfo.infoHeight);
-					if(!active) g.drawString(content.get(i).content.substring(Math.min(Math.max(0, selectedLeftIndex - 1), Main.activeWindow.content.get(i).content.length())), 
+					if(!active) g.drawString(content.get(i).content.substring(Math.min(Math.max(0, selectedLeftIndex - 1), content.get(i).content.length())), 
 							0 > selectedLeftIndex - 1 ? windowXOffset + sideBarWidth - textOffsetX : windowXOffset + sideBarWidth - Main.FONT_WIDTH, windowYOffset + (i * 20) - textOffsetY + Main.fileInfo.infoHeight);
 				}
 				else {
