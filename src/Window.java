@@ -20,8 +20,8 @@ public class Window {
 	
 	public int cursorIndex = 0;
 	
-	private Color backgroundColor;
-	private Color sidebarBackgroundColor;
+	private Color backgroundColor = new Color(0, 0, 0);
+	private Color sidebarBackgroundColor = new Color(0, 0, 0);
 	
 	public int highlightSelectedText = 0;
 	public int highlightSelectedIndex = 0;
@@ -31,6 +31,12 @@ public class Window {
 	public int selectedTopText = 0;
 	public int startCursorPosition = 0;
 	public int textOffsetY;
+	
+	public int opacity = 255;
+	public int textOpacity = 255;
+	
+	public int targetOpacity = 255;
+	public int targetTextOpacity = 255;
 	
 	public Window(boolean leftWindow) {
 		this.leftWindow = leftWindow;
@@ -48,6 +54,21 @@ public class Window {
 		startCursorPosition = windowXOffset + sideBarWidth;
 		cursorYIndex = selectedText - selectedTopText;
 		
+		float lerpSpeed = 0.1f;
+		
+		if(state == ProgramState.Editor) {
+			targetOpacity = active ? 255 : 100;
+			targetTextOpacity = active ? 255 : 100;
+		}
+		else if(state == ProgramState.NewFile) {
+			targetOpacity = 0;
+			targetTextOpacity = 0;
+			lerpSpeed = 0.2f;
+		}
+
+		opacity = (int)Maths.Lerp(opacity, targetOpacity, lerpSpeed);
+		textOpacity = (int)Maths.Lerp(textOpacity, targetTextOpacity, lerpSpeed);
+		
 		int targetTextOffsetX = Math.max(0, selectedLeftIndex) * 11;
 		int targetTextOffsetY = selectedTopText * Main.LINE_HEIGHT;
 		textOffsetX = (int)Maths.Lerp(textOffsetX, targetTextOffsetX, Settings.textXLerpSpeed);
@@ -61,7 +82,7 @@ public class Window {
 	
 	public void paintContent(Graphics g) {
 		for(int i = Math.max(0, selectedTopText); i < Math.min(content.size(), selectedTopText + Main.MAX_LINES - 1); i++) {
-			g.setColor(new Color(200, 200, 200, active ? 255 : 100));
+			g.setColor(new Color(200, 200, 200, textOpacity));
 
 			if(!leftWindow) {
 				if(active) g.drawString(content.get(i).content, windowXOffset + sideBarWidth - textOffsetX, windowYOffset + (i * 20) - textOffsetY + Main.fileInfo.infoHeight);
@@ -76,7 +97,8 @@ public class Window {
 	}
 	
 	public void paintSideBarBackground(Graphics g) {
-		g.setColor(sidebarBackgroundColor);
+		Color color = new Color(sidebarBackgroundColor.getRed(), sidebarBackgroundColor.getBlue(), sidebarBackgroundColor.getGreen(), opacity);
+		g.setColor(color);
 		g.fillRect(leftWindow ? 0 : Main.SCREEN_WIDTH/2 - (sideBarWidth/7), 0, sideBarWidth, Main.SCREEN_HEIGHT);
 	}
 	
@@ -92,18 +114,15 @@ public class Window {
 				Xoffset += 10;
 			}
 			
-			g.setColor(new Color(155, 155, 155, active ? 255 : 100));
+			g.setColor(new Color(155, 155, 155, textOpacity));
 			g.drawString(String.valueOf(j + 1), Xoffset, windowYOffset + (i * 20) + Main.fileInfo.infoHeight);
 		}
 	}
 	
 	public void paint(Graphics g) {
 		paintBackground(g);
-		
-		if(state == ProgramState.Editor) {			
-			paintContent(g);
-			paintSideBarBackground(g);
-			paintSideBarText(g);
-		}
+		paintContent(g);
+		paintSideBarBackground(g);
+		paintSideBarText(g);
 	}
 }

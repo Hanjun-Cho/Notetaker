@@ -109,7 +109,7 @@ public class Main extends JPanel implements EventListener {
 		g.setFont(fileInfoFont.font);
 		fileInfo.paint(g2D);
 		if(activeWindow.state == ProgramState.Editor) tempCursor.paint(g2D);
-		cursor.paint(g2D);		
+		cursor.paint(g2D);
 	}
 	
 	public synchronized void stop() {
