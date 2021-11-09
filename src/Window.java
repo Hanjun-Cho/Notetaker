@@ -1,5 +1,6 @@
 import java.awt.Color;
 import java.awt.Graphics;
+import java.io.File;
 import java.util.ArrayList;
 
 public class Window {
@@ -31,12 +32,13 @@ public class Window {
 	public int selectedTopText = 0;
 	public int startCursorPosition = 0;
 	public int textOffsetY;
+	public int fileSelectIndex = 0;
+	public int fileTopSelectIndex = 0;
 	
-	public int opacity = 255;
-	public int textOpacity = 255;
+	public boolean needsSave = false;
 	
-	public int targetOpacity = 255;
-	public int targetTextOpacity = 255;
+	public ArrayList<File> files = new ArrayList<File>();
+	public File selectedFile;
 	
 	public Window(boolean leftWindow) {
 		this.leftWindow = leftWindow;
@@ -47,27 +49,13 @@ public class Window {
 	public void update() {
 		selectedLeftIndex = Math.max(0, selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
 		selectedTopText = Math.max(0, selectedText - Main.MAX_LINES + 2);
+		fileTopSelectIndex = Math.max(0, fileSelectIndex - Main.MAX_FILE_DISPLAY + 1);
 		windowXOffset = leftWindow ? 11 : 11 + Main.SCREEN_WIDTH/2 - (sideBarWidth/7);
 		backgroundColor = active ? new Color(25, 25, 25) : new Color(22, 22, 22);
 		sidebarBackgroundColor = active ? new Color(20, 20, 20) : new Color(20, 20, 20);
 		cursorIndex = selectedIndex - selectedLeftIndex;
 		startCursorPosition = windowXOffset + sideBarWidth;
 		cursorYIndex = selectedText - selectedTopText;
-		
-		float lerpSpeed = 0.1f;
-		
-		if(state == ProgramState.Editor) {
-			targetOpacity = active ? 255 : 100;
-			targetTextOpacity = active ? 255 : 100;
-		}
-		else if(state == ProgramState.NewFile) {
-			targetOpacity = 0;
-			targetTextOpacity = 0;
-			lerpSpeed = 0.2f;
-		}
-
-		opacity = (int)Maths.Lerp(opacity, targetOpacity, lerpSpeed);
-		textOpacity = (int)Maths.Lerp(textOpacity, targetTextOpacity, lerpSpeed);
 		
 		int targetTextOffsetX = Math.max(0, selectedLeftIndex) * 11;
 		int targetTextOffsetY = selectedTopText * Main.LINE_HEIGHT;
@@ -77,12 +65,12 @@ public class Window {
 	
 	public void paintBackground(Graphics g) {
 		g.setColor(backgroundColor);
-		g.fillRect(leftWindow ? 0 : Main.SCREEN_WIDTH/2 - (sideBarWidth/7), 0, Main.SCREEN_WIDTH/2, Main.SCREEN_HEIGHT);
+		g.fillRect(leftWindow ? -7 : Main.SCREEN_WIDTH/2 - (sideBarWidth/7), 0, Main.SCREEN_WIDTH/2, Main.SCREEN_HEIGHT);
 	}
 	
 	public void paintContent(Graphics g) {
 		for(int i = Math.max(0, selectedTopText); i < Math.min(content.size(), selectedTopText + Main.MAX_LINES - 1); i++) {
-			g.setColor(new Color(200, 200, 200, textOpacity));
+			g.setColor(new Color(200, 200, 200, active ? 255 : 100));
 
 			if(!leftWindow) {
 				if(active) g.drawString(content.get(i).content, windowXOffset + sideBarWidth - textOffsetX, windowYOffset + (i * 20) - textOffsetY + Main.fileInfo.infoHeight);
@@ -97,8 +85,7 @@ public class Window {
 	}
 	
 	public void paintSideBarBackground(Graphics g) {
-		Color color = new Color(sidebarBackgroundColor.getRed(), sidebarBackgroundColor.getBlue(), sidebarBackgroundColor.getGreen(), opacity);
-		g.setColor(color);
+		g.setColor(sidebarBackgroundColor);
 		g.fillRect(leftWindow ? 0 : Main.SCREEN_WIDTH/2 - (sideBarWidth/7), 0, sideBarWidth, Main.SCREEN_HEIGHT);
 	}
 	
@@ -114,15 +101,40 @@ public class Window {
 				Xoffset += 10;
 			}
 			
-			g.setColor(new Color(155, 155, 155, textOpacity));
+			g.setColor(new Color(155, 155, 155, active ? 255 : 100));
 			g.drawString(String.valueOf(j + 1), Xoffset, windowYOffset + (i * 20) + Main.fileInfo.infoHeight);
 		}
 	}
 	
 	public void paint(Graphics g) {
 		paintBackground(g);
-		paintContent(g);
-		paintSideBarBackground(g);
-		paintSideBarText(g);
+		
+		if(state == ProgramState.Editor) {			
+			paintContent(g);
+			paintSideBarBackground(g);
+			paintSideBarText(g);
+		}
+		else if(state == ProgramState.NewFile || state == ProgramState.OpenFile) {
+			boolean newFile = state == ProgramState.NewFile;
+			files = FileManager.getFiles(Main.fileInfo.path, newFile ? Main.fileInfo.newFileString : Main.fileInfo.openFileString);
+			
+			if(files != null) {
+				for(int i = 0; i < Math.min(Main.MAX_FILE_DISPLAY, files.size()); i++) {			
+					int yOffset = (i * 58);
+					int xOffset = leftWindow ? 5 : Main.SCREEN_WIDTH/2 - (sideBarWidth/7) + 5;
+					if(i >= 1) yOffset -= 2;
+					if(i == (fileSelectIndex - fileTopSelectIndex)) {
+						g.setColor(new Color(25, 25, 25));
+					}
+					else {
+						g.setColor(new Color(30, 30, 30));						
+					}
+					g.fillRect(xOffset, windowYOffset + 10 + yOffset, Main.SCREEN_WIDTH / 2 - 17, i == 0 ? 51 : 53);
+					
+					g.setColor(new Color(200, 200, 200, 150));
+					if(fileTopSelectIndex + i < files.size()) g.drawString(files.get(fileTopSelectIndex + i).getName(), xOffset + 15, windowYOffset + 10 + yOffset + 31);
+				}
+			}
+		}
 	}
 }

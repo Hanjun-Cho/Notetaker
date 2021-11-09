@@ -57,9 +57,9 @@ public class Cursor {
 				cursorX = (int)Maths.Lerp(cursorX, targetX, Settings.cursorXLerpSpeed);
 				cursorY = (int)Maths.Lerp(cursorY, targetY, Settings.cursorYLerpSpeed);			
 			}
-			else if(Main.activeWindow.state == ProgramState.NewFile) {
+			else if(Main.activeWindow.state == ProgramState.NewFile || Main.activeWindow.state == ProgramState.OpenFile) {
 				//for targetX, there is a 2 pixel offset at index 0 and is completely fine everywhere else, so the first part is necessary, dont remove...
-				int targetX = 100 + (Main.FONT_WIDTH * Main.fileInfo.selectedIndex) + 6;
+				int targetX = (Main.activeWindow.state == ProgramState.NewFile ? 100 : 110) + (Main.FONT_WIDTH * Main.fileInfo.selectedIndex) + 6;
 				cursorX = (int)Maths.Lerp(cursorX, targetX, Settings.cursorXLerpSpeed);
 				cursorY = (int)Maths.Lerp(cursorY, 7, Settings.cursorYLerpSpeed);
 			}

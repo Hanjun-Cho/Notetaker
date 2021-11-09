@@ -65,41 +65,62 @@ public class Inputs extends KeyAdapter {
 	}
 	
 	private void executeShortcut(String command) {
-		if(command.equals("switchToRightWindow")) {
+		if(command.equals("Switch To Right Window") && Main.activeWindow.state == ProgramState.Editor) {
 			Main.switchToRightWindow();
 			shortcut = true;
-			return;
 		}
 		
-		if(command.equals("switchToLeftWindow")) {
+		if(command.equals("Switch To Left Window") && Main.activeWindow.state == ProgramState.Editor) {
 			Main.switchToLeftWindow();
 			shortcut = true;
-			return;
 		}
 		
-		if(command.equals("deleteLine")) {
+		if(command.equals("Delete Line") && Main.activeWindow.state == ProgramState.Editor) {
 			deleteLine();
 			shortcut = true;
-			return;
 		}
 		
-		if(command.equals("changeHighlightStartPosition")) {
+		if(command.equals("Change Highlight Start Position") && Main.activeWindow.state == ProgramState.Editor) {
 			Main.activeWindow.highlightSelectedIndex = Main.activeWindow.selectedIndex;
 			Main.activeWindow.highlightSelectedText = Main.activeWindow.selectedText;
 			shortcut = true;
-			return;
 		}
 		
-		if(command.equals("createNewFile")) {
+		if(command.equals("New File") && Main.activeWindow.state == ProgramState.Editor) {
 			Main.activeWindow.state = ProgramState.NewFile;
 			shortcut = true;
-			return;
 		}
 		
-		if(command.equals("returnToEditor")) {
+		if(command.equals("Save File") && Main.activeWindow.state == ProgramState.Editor) {
+			FileManager.saveFile();
+			shortcut = true;
+		}
+		
+		if(command.equals("Return to Editor") && Main.activeWindow.state != ProgramState.Editor) {
 			returnToEditor();
 			shortcut = true;
-			return;
+		}
+		
+		if(command.equals("Open File") && Main.activeWindow.state != ProgramState.OpenFile) {
+			Main.activeWindow.state = ProgramState.OpenFile;
+			Main.fileInfo.newFileString = "";
+			Main.fileInfo.selectedIndex = 0;
+			shortcut = true;
+		}
+		
+		if(command.equals("Go Back A Folder") && (Main.activeWindow.state == ProgramState.OpenFile || Main.activeWindow.state == ProgramState.NewFile)) {
+			int i = Main.fileInfo.path.length() - 2;
+			
+			for(; i >= 0; i--) {
+				if(Main.fileInfo.path.charAt(i) == '/' || Main.fileInfo.path.charAt(i) == '\\') {
+					break;
+				}
+			}
+			
+			String s = Main.fileInfo.path.substring(0, Math.max(0, i)) + "/";
+			if(s.length() < Main.fileInfo.originalPath.length()) s = Main.fileInfo.originalPath;
+			Main.fileInfo.path = s;
+			shortcut = true;
 		}
 	}
 	
@@ -119,6 +140,7 @@ public class Inputs extends KeyAdapter {
 			Main.activeWindow.selectedText--;
 			Main.activeWindow.selectedIndex = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length();
 			Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
+			Main.activeWindow.needsSave = true;
 		} else {
 			//when we are currently on the first line
 			//we remove the contents of the current line
@@ -126,6 +148,7 @@ public class Inputs extends KeyAdapter {
 			Main.activeWindow.content.get(Main.activeWindow.selectedText).content = "";
 			Main.activeWindow.selectedIndex = 0;
 			Main.activeWindow.selectedLeftIndex = 0;
+			Main.activeWindow.needsSave = true;
 		}
 	}
 
@@ -136,13 +159,14 @@ public class Inputs extends KeyAdapter {
 				String content = Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(0, Main.activeWindow.selectedIndex);
 				Main.activeWindow.content.get(Main.activeWindow.selectedText).content = content + e.getKeyChar() + Main.activeWindow.content.get(Main.activeWindow.selectedText).content.substring(Main.activeWindow.selectedIndex);
 				Main.activeWindow.selectedIndex++;
-				
+				Main.activeWindow.needsSave = true;
 				//once the index is over the end of line, just increment the left index so the line inspector moves as well
 				// that 2nd line after this line is what stops the text from acting stupid and not move the inspector when you delete something from the selected line
 				if ((Main.activeWindow.selectedIndex > Main.MAX_CHARACTERS_PER_LINE - 1)) Main.activeWindow.selectedLeftIndex++;
 				if (((Main.activeWindow.selectedIndex < Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length())) && Main.activeWindow.cursorIndex < Main.MAX_CHARACTERS_PER_LINE - 1) Main.activeWindow.selectedLeftIndex--;
 			} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 				createNewLine();
+				Main.activeWindow.needsSave = true;
 			} 
 			else if(e.getKeyCode() == KeyEvent.VK_TAB) {
 				//next 3 lines are straight-forward, you basically just add in the TAB characters entered right between the text
@@ -153,18 +177,29 @@ public class Inputs extends KeyAdapter {
 				//no idea why this work but it does so I'll keep it
 				if ((Main.activeWindow.selectedIndex > Main.MAX_CHARACTERS_PER_LINE - 1)) Main.activeWindow.selectedLeftIndex += Math.max(0, Main.activeWindow.selectedIndex - (Main.MAX_CHARACTERS_PER_LINE - 1));
 				if (((Main.activeWindow.selectedIndex < Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length())) && Main.activeWindow.cursorIndex < Main.MAX_CHARACTERS_PER_LINE - 1) Main.activeWindow.selectedLeftIndex -= Math.max(0, Main.activeWindow.selectedIndex - (Main.MAX_CHARACTERS_PER_LINE - 1));
-				
+				Main.activeWindow.needsSave = true;
 			}
 		}
-		else if(Main.activeWindow.state == ProgramState.NewFile) {
-			if(typable(e) && Main.fileInfo.newFileString.length() < 50) {
-				String content = Main.fileInfo.newFileString.substring(0, Main.fileInfo.selectedIndex);
-				Main.fileInfo.newFileString = content + e.getKeyChar() + Main.fileInfo.newFileString.substring(Main.fileInfo.selectedIndex);
+		else if(Main.activeWindow.state == ProgramState.NewFile || Main.activeWindow.state == ProgramState.OpenFile) {
+			boolean newFile = Main.activeWindow.state == ProgramState.NewFile;
+			
+			if(typable(e) && (newFile ? Main.fileInfo.newFileString.length() : Main.fileInfo.openFileString.length()) < 50) {
+				String content = newFile ? Main.fileInfo.newFileString.substring(0, Main.fileInfo.selectedIndex) : Main.fileInfo.openFileString.substring(0, Main.fileInfo.selectedIndex);
+				if(newFile) Main.fileInfo.newFileString = content + e.getKeyChar() + Main.fileInfo.newFileString.substring(Main.fileInfo.selectedIndex);
+				else Main.fileInfo.openFileString = content + e.getKeyChar() + Main.fileInfo.openFileString.substring(Main.fileInfo.selectedIndex);
 				Main.fileInfo.selectedIndex++;
 			}
 			else if(e.getKeyCode() == KeyEvent.VK_ENTER) {
-				System.out.println("created file -> " + Main.fileInfo.newFileString);
-				returnToEditor();
+				if(newFile) {					
+					int status = FileManager.createFile(Main.fileInfo.path);
+					
+					if(status == 1) {					
+						returnToEditor();
+					}
+				}
+				else {
+					FileManager.loadFile(Main.fileInfo.path);
+				}
 			}
 		}
 	}
@@ -186,9 +221,9 @@ public class Inputs extends KeyAdapter {
 			moveRight(e);
 		} else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
 			moveLeft(e);
-		} else if (e.getKeyCode() == KeyEvent.VK_UP && Main.activeWindow.state == ProgramState.Editor) {
+		} else if (e.getKeyCode() == KeyEvent.VK_UP) {
 			moveUp(e);
-		} else if (e.getKeyCode() == KeyEvent.VK_DOWN && Main.activeWindow.state == ProgramState.Editor) {
+		} else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
 			moveDown(e);
 		}
 	}
@@ -226,18 +261,28 @@ public class Inputs extends KeyAdapter {
 					}
 				}
 			}
-			else if(Main.activeWindow.state == ProgramState.NewFile) {
+			else if(Main.activeWindow.state == ProgramState.NewFile || Main.activeWindow.state == ProgramState.OpenFile) {
+				boolean newFile = Main.activeWindow.state == ProgramState.NewFile;
 				int i = Main.fileInfo.selectedIndex + 1;
 				
-				for(; i < Main.fileInfo.newFileString.length() - 1; i++) {
-					if((Main.fileInfo.newFileString.charAt(i) == ' ' && 
-							Main.fileInfo.newFileString.charAt(i - 1) != ' ') || 
-							Character.isUpperCase(Main.fileInfo.newFileString.charAt(i))) {
-						return i;
+				for(; i < (newFile ? Main.fileInfo.newFileString.length() - 1 : Main.fileInfo.openFileString.length() - 1); i++) {
+					if(newFile) {						
+						if((Main.fileInfo.newFileString.charAt(i) == ' ' && 
+								Main.fileInfo.newFileString.charAt(i - 1) != ' ') || 
+								Character.isUpperCase(Main.fileInfo.newFileString.charAt(i))) {
+							return i;
+						}
+					}
+					else {
+						if((Main.fileInfo.openFileString.charAt(i) == ' ' && 
+								Main.fileInfo.openFileString.charAt(i - 1) != ' ') || 
+								Character.isUpperCase(Main.fileInfo.openFileString.charAt(i))) {
+							return i;
+						}
 					}
 				}
 				
-				return Main.fileInfo.newFileString.length();
+				return (newFile ? Main.fileInfo.newFileString.length(): Main.fileInfo.openFileString.length());
 			}
 		} else if (direction.equals("left") || direction.equals("leftdel")) {
 			if(Main.activeWindow.state == ProgramState.Editor) {				
@@ -262,14 +307,24 @@ public class Inputs extends KeyAdapter {
 					}
 				}
 			}
-			else if(Main.activeWindow.state == ProgramState.NewFile) {
+			else if(Main.activeWindow.state == ProgramState.NewFile || Main.activeWindow.state == ProgramState.OpenFile) {
+				boolean newFile = Main.activeWindow.state == ProgramState.NewFile;
 				int i = Math.max(Main.fileInfo.selectedIndex - 1, 0);
 				
 				for(; i > 0; i--) {
-					if((Main.fileInfo.newFileString.charAt(i) == ' ' && 
-							Main.fileInfo.newFileString.charAt(i - 1) != ' ') || 
-							Character.isUpperCase(Main.fileInfo.newFileString.charAt(i))) {
-						return i;
+					if(newFile) {
+						if((Main.fileInfo.newFileString.charAt(i) == ' ' && 
+								Main.fileInfo.newFileString.charAt(i - 1) != ' ') || 
+								Character.isUpperCase(Main.fileInfo.newFileString.charAt(i))) {
+							return i;
+						}
+					}
+					else {
+						if((Main.fileInfo.openFileString.charAt(i) == ' ' && 
+								Main.fileInfo.openFileString.charAt(i - 1) != ' ') || 
+								Character.isUpperCase(Main.fileInfo.openFileString.charAt(i))) {
+							return i;
+						}
 					}
 				}
 				
@@ -320,10 +375,14 @@ public class Inputs extends KeyAdapter {
 					Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length() - Main.MAX_CHARACTERS_PER_LINE + 1);
 				}
 			}
+			
+			Main.activeWindow.needsSave = true;
 		}
-		else if(Main.activeWindow.state == ProgramState.NewFile) {
+		else if(Main.activeWindow.state == ProgramState.NewFile || Main.activeWindow.state == ProgramState.OpenFile) {
+			boolean newFile = Main.activeWindow.state == ProgramState.NewFile;
 			if(Main.fileInfo.selectedIndex > 0) {
-				Main.fileInfo.newFileString = Main.fileInfo.newFileString.substring(0, Main.fileInfo.selectedIndex - 1) + Main.fileInfo.newFileString.substring(Main.fileInfo.selectedIndex);
+				if(newFile) Main.fileInfo.newFileString = Main.fileInfo.newFileString.substring(0, Main.fileInfo.selectedIndex - 1) + Main.fileInfo.newFileString.substring(Main.fileInfo.selectedIndex);
+				else Main.fileInfo.openFileString = Main.fileInfo.openFileString.substring(0, Main.fileInfo.selectedIndex - 1) + Main.fileInfo.openFileString.substring(Main.fileInfo.selectedIndex);
 				Main.fileInfo.selectedIndex--;
 			}
 		}
@@ -382,10 +441,14 @@ public class Inputs extends KeyAdapter {
 					Main.activeWindow.selectedLeftIndex = 0;
 				}
 			}
+			
+			Main.activeWindow.needsSave = true;
 		}
-		else if(Main.activeWindow.state == ProgramState.NewFile) {
+		else if(Main.activeWindow.state == ProgramState.NewFile|| Main.activeWindow.state == ProgramState.OpenFile) {
+			boolean newFile = Main.activeWindow.state == ProgramState.NewFile;
 			int nextLeft = nextSpace("left");
-			Main.fileInfo.newFileString = Main.fileInfo.newFileString.substring(0, nextLeft) + Main.fileInfo.newFileString.substring(Main.fileInfo.selectedIndex);
+			if(newFile) Main.fileInfo.newFileString = Main.fileInfo.newFileString.substring(0, nextLeft) + Main.fileInfo.newFileString.substring(Main.fileInfo.selectedIndex);
+			else Main.fileInfo.openFileString = Main.fileInfo.openFileString.substring(0, nextLeft) + Main.fileInfo.openFileString.substring(Main.fileInfo.selectedIndex);
 			Main.fileInfo.selectedIndex = nextLeft;
 		}
 	}
@@ -416,9 +479,10 @@ public class Inputs extends KeyAdapter {
 				Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
 			}
 		}
-		else if(Main.activeWindow.state == ProgramState.NewFile) {
+		else if(Main.activeWindow.state == ProgramState.NewFile || Main.activeWindow.state == ProgramState.OpenFile) {
+			boolean newFile = Main.activeWindow.state == ProgramState.NewFile;
 			if(!e.isControlDown()) {				
-				if(Main.fileInfo.selectedIndex < Main.fileInfo.newFileString.length()) {
+				if(Main.fileInfo.selectedIndex < (newFile ? Main.fileInfo.newFileString.length() : Main.fileInfo.openFileString.length())) {
 					Main.fileInfo.selectedIndex++;
 				}
 			}
@@ -456,7 +520,7 @@ public class Inputs extends KeyAdapter {
 				if (Main.activeWindow.selectedIndex < Main.activeWindow.selectedLeftIndex) Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
 			}
 		}
-		else if(Main.activeWindow.state == ProgramState.NewFile) {
+		else if(Main.activeWindow.state == ProgramState.NewFile || Main.activeWindow.state == ProgramState.OpenFile) {
 			if(!e.isControlDown()) {				
 				if(Main.fileInfo.selectedIndex > 0) {
 					Main.fileInfo.selectedIndex--;
@@ -470,53 +534,63 @@ public class Inputs extends KeyAdapter {
 	}
 	
 	private void moveUp(KeyEvent e) {
-		if (!e.isControlDown()) {
-			if (Main.activeWindow.selectedText > 0) {
-				//if there is a line before the currently selected one
-				//adjust all variables so it moves to that line
-				Main.activeWindow.selectedText--;
-				Main.activeWindow.selectedIndex = Math.min(Main.activeWindow.selectedIndex, Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length());
-				Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
+		if(Main.activeWindow.state == ProgramState.Editor) {			
+			if (!e.isControlDown()) {
+				if (Main.activeWindow.selectedText > 0) {
+					//if there is a line before the currently selected one
+					//adjust all variables so it moves to that line
+					Main.activeWindow.selectedText--;
+					Main.activeWindow.selectedIndex = Math.min(Main.activeWindow.selectedIndex, Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length());
+					Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
+					
+					if(Main.activeWindow.selectedText < Main.activeWindow.selectedTopText) {
+						Main.activeWindow.selectedTopText--;
+					}
+				}
+			} else {
+				//looks for the next gap between paragraphs
+				//adjusts variables so it moves to that gap
+				int nextUp = nextSpace("up");
+				Main.activeWindow.selectedText = nextUp;
+				Main.activeWindow.selectedLeftIndex = 0;
 				
-				if(Main.activeWindow.selectedText < Main.activeWindow.selectedTopText) {
-					Main.activeWindow.selectedTopText--;
+				if(nextUp < Main.activeWindow.selectedTopText) {
+					Main.activeWindow.selectedTopText = Math.max(0,  Main.activeWindow.selectedText - Main.MAX_LINES - 1);
 				}
 			}
-		} else {
-			//looks for the next gap between paragraphs
-			//adjusts variables so it moves to that gap
-			int nextUp = nextSpace("up");
-			Main.activeWindow.selectedText = nextUp;
-			Main.activeWindow.selectedLeftIndex = 0;
-			
-			if(nextUp < Main.activeWindow.selectedTopText) {
-				Main.activeWindow.selectedTopText = Math.max(0,  Main.activeWindow.selectedText - Main.MAX_LINES - 1);
+		}
+		else if(Main.activeWindow.state == ProgramState.NewFile || Main.activeWindow.state == ProgramState.OpenFile) {
+			if(Main.activeWindow.fileSelectIndex > 0) {
+				Main.activeWindow.fileSelectIndex--;
 			}
 		}
 	}
 	
 	private void moveDown(KeyEvent e) {
-		if (!e.isControlDown()) {
-			if (Main.activeWindow.selectedText < Main.activeWindow.content.size() - 1) {
-				//if there is a line after the currently selected one
-				//adjust all variables so it moves to that line
-				Main.activeWindow.selectedText++;
-				Main.activeWindow.selectedIndex = Math.min(Main.activeWindow.selectedIndex, Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length());
-				Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
+		if(Main.activeWindow.state == ProgramState.Editor) {			
+			if (!e.isControlDown()) {
+				if (Main.activeWindow.selectedText < Main.activeWindow.content.size() - 1) {
+					//if there is a line after the currently selected one
+					//adjust all variables so it moves to that line
+					Main.activeWindow.selectedText++;
+					Main.activeWindow.selectedIndex = Math.min(Main.activeWindow.selectedIndex, Main.activeWindow.content.get(Main.activeWindow.selectedText).content.length());
+					Main.activeWindow.selectedLeftIndex = Math.max(0, Main.activeWindow.selectedIndex - Main.MAX_CHARACTERS_PER_LINE + 1);
+				}
+			} else {
+				//looks for the next gap between paragraphs
+				//adjusts variables so it moves to that gap
+				int nextDown = nextSpace("down");
+				Main.activeWindow.selectedText = nextDown;
+				Main.activeWindow.selectedLeftIndex = 0;
 				
-				if(Main.activeWindow.selectedText >= Main.activeWindow.selectedTopText + Main.MAX_LINES - 1) {
-					Main.activeWindow.selectedTopText++;
+				if(nextDown > Main.activeWindow.selectedTopText + Main.MAX_LINES - 1) {
+					Main.activeWindow.selectedTopText = Main.activeWindow.content.size() - Main.MAX_LINES - 1;
 				}
 			}
-		} else {
-			//looks for the next gap between paragraphs
-			//adjusts variables so it moves to that gap
-			int nextDown = nextSpace("down");
-			Main.activeWindow.selectedText = nextDown;
-			Main.activeWindow.selectedLeftIndex = 0;
-			
-			if(nextDown > Main.activeWindow.selectedTopText + Main.MAX_LINES - 1) {
-				Main.activeWindow.selectedTopText = Main.activeWindow.content.size() - Main.MAX_LINES - 1;
+		}
+		else if(Main.activeWindow.state == ProgramState.NewFile || Main.activeWindow.state == ProgramState.OpenFile){
+			if(Main.activeWindow.fileSelectIndex < Main.activeWindow.files.size() - 1) {
+				Main.activeWindow.fileSelectIndex++;
 			}
 		}
 	}

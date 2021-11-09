@@ -19,12 +19,15 @@ public class Settings {
 	
 	//Shortcuts (shortcuts should only be prefix + a singular letter i.e CTRL-SHIFT-ALT-A)
 	public static String[] commands = new String[] {
-		"switchToRightWindow",
-		"switchToLeftWindow",
-		"deleteLine",
-		"changeHighlightStartPosition",
-		"createNewFile",
-		"returnToEditor"
+		"Switch To Right Window",
+		"Switch To Left Window",
+		"Delete Line",
+		"Change Highlight Start Position",
+		"New File",
+		"Save File",
+		"Return to Editor",
+		"Open File",
+		"Go Back A Folder"
 	};
 	
 	public static ArrayList<String> convert = new ArrayList<String>();
@@ -38,7 +41,10 @@ public class Settings {
 		addShortcut(2, "CTRL-SHIFT-D");
 		addShortcut(3, "CTRL-SHIFT-SPACE");
 		addShortcut(4, "CTRL-N");
-		addShortcut(5, "ESCAPE");
+		addShortcut(5, "CTRL-S");
+		addShortcut(6, "ESCAPE");
+		addShortcut(7, "CTRL-O");
+		addShortcut(8, "CTRL-DELETE");
 		setupConvert();
 	}
 	
@@ -74,6 +80,7 @@ public class Settings {
 		addConvert("LEFT", KeyEvent.VK_LEFT);
 		addConvert("SPACE", KeyEvent.VK_SPACE);
 		addConvert("ESCAPE", 27);
+		addConvert("DELETE", KeyEvent.VK_BACK_SPACE);
 	}
 	
 	private void addConvert(String command, int id) {

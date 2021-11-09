@@ -26,6 +26,7 @@ public class Main extends JPanel implements EventListener {
 	public static int SCREEN_RESOLUTION_WIDTH = 0;
 	public static int SCREEN_RESOLUTION_HEIGHT = 0;
 	public static int TARGET_FPS = 144;
+	public static int MAX_FILE_DISPLAY;
 	
 	private static Window leftWindow = new Window(true);
 	private static Window rightWindow = new Window(false);
@@ -73,6 +74,7 @@ public class Main extends JPanel implements EventListener {
 		SCREEN_HEIGHT = frame.getHeight();
 		MAX_CHARACTERS_PER_LINE = (((SCREEN_WIDTH/2)-leftWindow.sideBarWidth - leftWindow.windowXOffset)/FONT_WIDTH) - 1;
 		MAX_LINES = (SCREEN_HEIGHT - fileInfo.infoHeight)/LINE_HEIGHT-2;
+		MAX_FILE_DISPLAY = (SCREEN_HEIGHT - fileInfo.infoHeight)/58;
 		
 		if(Main.activeWindow.state == ProgramState.Editor) {
 			FONT_WIDTH = editorFont.getFontPixelWidth();
